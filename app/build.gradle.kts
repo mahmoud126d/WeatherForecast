@@ -72,11 +72,14 @@ dependencies {
     //Room
     implementation (libs.androidx.room.ktx)
     implementation (libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
+    //ksp(libs.androidx.room.compiler)
 
     //Retrofit
-    implementation (libs.x.x.x)
-    implementation (libs.converter.gson)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     //GSON
-    implementation (libs.x.x0.x)
+   // implementation (libs.x.x0.x)
+
+    //navigation
+    implementation(libs.androidx.navigation.compose.v289)
 }

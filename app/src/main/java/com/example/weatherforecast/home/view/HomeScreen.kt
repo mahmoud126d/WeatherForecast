@@ -1,6 +1,5 @@
 package com.example.weatherforecast.home.view
 
-import android.health.connect.datatypes.units.Temperature
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,8 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -31,7 +28,10 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,8 +43,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -110,6 +108,7 @@ fun RefreshableScreen(
                 WeatherInfoCard(
                     currentWeatherState.value,
                     contentDescription = "",
+                    formattedDateTime = homeViewModel.getDateTime()
                 )
             }
             item {
@@ -141,25 +140,26 @@ fun RefreshableScreen(
     }
 }
 
-//@Preview(showSystemUi = true)
-@Composable
-fun WeatherInfoCardPreview() {
-    WeatherInfoCard(
-        CurrentWeather(
-            temperature = 22.0,
-            humidity = 11,
-            description = "decription",
-            pressure = 12,
-            city = "Suez",
-            speed = 434.0,
-            cloud = 123
-        ), ""
-    )
-}
+////@Preview(showSystemUi = true)
+//@Composable
+//fun WeatherInfoCardPreview() {
+//    WeatherInfoCard(
+//        CurrentWeather(
+//            temperature = 22.0,
+//            humidity = 11,
+//            description = "decription",
+//            pressure = 12,
+//            city = "Suez",
+//            speed = 434.0,
+//            cloud = 123
+//        ), ""
+//    )
+//}
 
 @Composable
 fun WeatherInfoCard(
     currentWeather: CurrentWeather?,
+    formattedDateTime:String,
     contentDescription: String
 ) {
     Box(
@@ -222,7 +222,7 @@ fun WeatherInfoCard(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "skyState",
+                            text = currentWeather?.description ?: "",
                             fontSize = 22.sp
                         )
                     }
@@ -230,8 +230,8 @@ fun WeatherInfoCard(
 
                 // Time Row
                 Text(
-                    text = "time",
-                    modifier = Modifier.align(Alignment.Start) // Align to the start
+                    text = formattedDateTime,
+                    modifier = Modifier.align(Alignment.Start)
                 )
             }
         }

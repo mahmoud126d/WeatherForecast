@@ -8,9 +8,12 @@ import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
 import com.example.weatherforecast.utils.Constants
+import com.example.weatherforecast.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
 class HomeViewModel(
     private var repo: CurrentWeatherRepository
 ) : ViewModel() {
@@ -44,5 +47,9 @@ class HomeViewModel(
             }
         }
     }
+
+    fun getDateTime()=DateUtils.getFormattedDateTime()
+
+
 
 }

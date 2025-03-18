@@ -62,7 +62,7 @@ fun MainScreen(navController: NavHostController) {
     }
 
     Scaffold(
-        topBar = { TopAppBar(navController) },
+     //   topBar = { TopAppBar(navController) },
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
         NavHost(

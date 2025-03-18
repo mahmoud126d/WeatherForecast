@@ -85,6 +85,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose.v289)
     //pull to refresh
     implementation (libs.accompanist.swiperefresh)
+    //for make content extend on top of screen
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
 
 
 }

@@ -1,6 +1,7 @@
 package com.example.weatherforecast.repository
 
 import com.example.weatherforecast.model.CurrentWeatherResponse
+import com.example.weatherforecast.model.FiveDaysWeatherResponse
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSource
 
 class CurrentWeatherRepositoryImpl private constructor(
@@ -12,6 +13,14 @@ class CurrentWeatherRepositoryImpl private constructor(
         appId: String
     ): CurrentWeatherResponse? {
         return currentWeatherRemoteRepository.getCurrentWeather(lat, lon, appId)
+    }
+
+    override suspend fun getFiveDaysWeather(
+        lat: Double,
+        lon: Double,
+        appId: String
+    ): FiveDaysWeatherResponse? {
+        return currentWeatherRemoteRepository.getFiveDaysWeather(lat, lon, appId)
     }
 
     companion object {

@@ -5,7 +5,8 @@ data class CurrentWeather(
     val humidity: Int,
     val description: String,
     val pressure:Int,
-    val city:String,
+    val city:String = "Default City",
     val speed:Double,
-    val cloud:Int
+    val cloud:Int,
+    val date:String= "Default Date",
 )

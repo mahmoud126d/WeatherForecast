@@ -28,10 +28,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +40,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -79,8 +78,13 @@ fun RefreshableScreen(
     homeViewModel: HomeViewModel
 ) {
     homeViewModel.getCurrentWeather()
+    homeViewModel.getHourlyWeather()
+    homeViewModel.getDailyWeather()
     val currentWeatherState = homeViewModel.currentWeather.observeAsState()
     val messageState = homeViewModel.message.observeAsState()
+    val hourlyWeatherMap = homeViewModel.hourlyWeatherMap.observeAsState()
+    val dailyWeatherMap = homeViewModel.dailyWeatherMap.observeAsState()
+
 
     val temperature = currentWeatherState.value
     Log.d(TAG, temperature.toString())
@@ -122,13 +126,15 @@ fun RefreshableScreen(
             item {
                 WeatherPeriodBox(
                     "Hourly forecast",
-                    painterResource(R.drawable.clock)
+                    painterResource(R.drawable.clock),
+                    hourlyWeatherMap.value
                 )
             }
             item {
                 WeatherPeriodBox(
                     "Day forecast",
-                    painterResource(R.drawable.clock)
+                    painterResource(R.drawable.clock),
+                    dailyWeatherMap.value
                 )
             }
         }
@@ -140,21 +146,22 @@ fun RefreshableScreen(
     }
 }
 
-////@Preview(showSystemUi = true)
-//@Composable
-//fun WeatherInfoCardPreview() {
-//    WeatherInfoCard(
-//        CurrentWeather(
-//            temperature = 22.0,
-//            humidity = 11,
-//            description = "decription",
-//            pressure = 12,
-//            city = "Suez",
-//            speed = 434.0,
-//            cloud = 123
-//        ), ""
-//    )
-//}
+@Preview(showSystemUi = true, device = Devices.PIXEL_4)
+@Composable
+fun WeatherInfoCardPreview() {
+    WeatherInfoCard(
+        CurrentWeather(
+            temperature = 22.0,
+            humidity = 11,
+            description = "decription",
+            pressure = 12,
+            city = "Suez",
+            speed = 434.0,
+            cloud = 123
+        ), "",
+        contentDescription = ""
+    )
+}
 
 @Composable
 fun WeatherInfoCard(
@@ -384,6 +391,7 @@ fun WeatherStateCardPreview() {
 fun WeatherPeriodBox(
     title:String,
     icon:Painter,
+    periodWeatherMap:Map<String,String>?
 ) {
     Box(
         modifier = Modifier
@@ -415,17 +423,17 @@ fun WeatherPeriodBox(
                         painter = icon
                     )
                 }
-                Text("Hourly forecast")
+                Text(title)
             }
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(30) {
+                items(periodWeatherMap?.size ?: 0) {index->
                     HourlyWeatherColumn(
-                        "10AM",
+                        periodWeatherMap?.keys?.elementAt(index) ?: "",
                         painterResource(R.drawable.cloudandsun),
-                        "10"
+                        (periodWeatherMap?.values?.elementAt(index) ?: "").toString()
                     )
                 }
             }

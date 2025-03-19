@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -35,13 +36,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -158,7 +168,7 @@ fun WeatherInfoCardPreview() {
             city = "Suez",
             speed = 434.0,
             cloud = 123
-        ), "",
+        ), "January 18, 16:14",
         contentDescription = ""
     )
 }
@@ -166,15 +176,20 @@ fun WeatherInfoCardPreview() {
 @Composable
 fun WeatherInfoCard(
     currentWeather: CurrentWeather?,
-    formattedDateTime:String,
+    formattedDateTime: String,
     contentDescription: String
 ) {
+    // Get the current configuration
+    val configuration = LocalConfiguration.current
+    // The screen width in dp
+    val screenWidthDp = configuration.screenWidthDp
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
             .clip(RoundedCornerShape(bottomEnd = 24.dp, bottomStart = 24.dp))
     ) {
+
         // Background Image
         Image(
             modifier = Modifier.fillMaxSize(),
@@ -184,40 +199,47 @@ fun WeatherInfoCard(
         )
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
+            Text(
+                  modifier = Modifier.offset(x= screenWidthDp.dp/2 + 40.dp, y = 300.dp/2),
+                text = "Feels like 15°",
+                fontSize = 14.sp,
+            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                currentWeather?.city?.let {
+
+                Row(
+                   Modifier.padding(all = 16.dp)
+                ) {
                     Text(
-                        text = it,
+                        text = currentWeather?.city ?: "Default",
                         fontSize = 22.sp
                     )
                 }
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Text(
-                            text = "20\u00B0",
-                            fontSize = 80.sp,
-                            textAlign = TextAlign.End
-                        )
-                        Text(
-                            text = "Feels like ${currentWeather?.temperature}\u00B0",
-                            fontSize = 20.sp,
-                            modifier = Modifier.offset(y = (-24).dp, x = (-28).dp)
-                        )
-                    }
-
-                    // Weather Icon and Description
+                        Column {
+                            Text(
+                                text = "20°",
+                                fontSize = 100.sp,
+                            )
+                        }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Time Row
+                    Text(
+                        text = formattedDateTime,
+                    )
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceEvenly
@@ -225,7 +247,7 @@ fun WeatherInfoCard(
                         Image(
                             contentDescription = "",
                             painter = painterResource(id = R.drawable.cloudandsun),
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(60.dp)
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
@@ -234,12 +256,6 @@ fun WeatherInfoCard(
                         )
                     }
                 }
-
-                // Time Row
-                Text(
-                    text = formattedDateTime,
-                    modifier = Modifier.align(Alignment.Start)
-                )
             }
         }
     }
@@ -389,9 +405,9 @@ fun WeatherStateCardPreview() {
 //@Preview(showSystemUi = true, device = Devices.PIXEL_4)
 @Composable
 fun WeatherPeriodBox(
-    title:String,
-    icon:Painter,
-    periodWeatherMap:Map<String,String>?
+    title: String,
+    icon: Painter,
+    periodWeatherMap: Map<String, String>?
 ) {
     Box(
         modifier = Modifier
@@ -402,7 +418,7 @@ fun WeatherPeriodBox(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding( 8.dp)
+            modifier = Modifier.padding(8.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -429,7 +445,7 @@ fun WeatherPeriodBox(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(periodWeatherMap?.size ?: 0) {index->
+                items(periodWeatherMap?.size ?: 0) { index ->
                     HourlyWeatherColumn(
                         periodWeatherMap?.keys?.elementAt(index) ?: "",
                         painterResource(R.drawable.cloudandsun),
@@ -444,8 +460,8 @@ fun WeatherPeriodBox(
 
 @Composable
 fun HourlyWeatherColumn(
-    time:String,
-    icon:Painter,
+    time: String,
+    icon: Painter,
     temperature: String
 ) {
     Column(

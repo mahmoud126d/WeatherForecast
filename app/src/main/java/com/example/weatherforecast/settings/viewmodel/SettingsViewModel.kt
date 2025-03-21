@@ -7,18 +7,24 @@ import androidx.lifecycle.asLiveData
 import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
-    val language: LiveData<String?> = repository.languageFlow.asLiveData()
-    val tempUnit: LiveData<String?> = repository.temperatureUnitFlow.asLiveData()
+class SettingsViewModel(private val settingsRepository: SettingsRepository) : ViewModel() {
+    val language: LiveData<String?> = settingsRepository.languageFlow.asLiveData()
+    val tempUnit: LiveData<String?> = settingsRepository.temperatureUnitFlow.asLiveData()
 
     fun saveLanguage(lang: String) {
         viewModelScope.launch {
-            repository.saveLanguage(lang)
+            settingsRepository.saveLanguage(lang)
         }
     }
     fun saveTemperatureUnit(unit: String) {
         viewModelScope.launch {
-            repository.saveTemperatureUnit(unit)
+            settingsRepository.saveTemperatureUnit(unit)
         }
+    }
+    fun getDefaultLanguage(){
+        settingsRepository.getDefaultLanguage()
+    }
+    fun changeLanguage(langCode:String){
+        settingsRepository.changeLanguage(langCode)
     }
 }

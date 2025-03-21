@@ -18,6 +18,7 @@ navigationComposeVersion = "2.8.9"
 roomKtx = "2.6.1"
 runtimeLivedata = "1.0.0"
 playServicesLocationVersion = "21.3.0"
+appcompat = "1.7.0"
 
 [libraries]
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwiperefresh" }
@@ -48,6 +49,7 @@ gson = { group = "com.google.code.gson", name = "gson", version = "2.10.1" }
 playservices-location = { module = "com.google.android.gms:playservices-location", version.ref = "playservicesLocation" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocationVersion" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 
 [plugins]

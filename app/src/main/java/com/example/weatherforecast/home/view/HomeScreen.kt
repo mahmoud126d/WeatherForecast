@@ -1,6 +1,18 @@
 package com.example.weatherforecast.home.view
 
+import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.os.Looper
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +41,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +55,7 @@ import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -54,6 +68,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherforecast.R
 import com.example.weatherforecast.home.viewmodel.HomeViewModel
@@ -62,17 +79,49 @@ import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
+import com.example.weatherforecast.repository.LocationRepository
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 
 private const val TAG = "HomeScreen"
 
+private const val MY_LOCATION_PERMISSION_ID = 5005
+
 @Composable
 fun HomeScreen() {
+    val context = LocalContext.current
+    val locationManager = com.example.weatherforecast.LocationManager(context)
     val factory = HomeViewModelFactory(
         CurrentWeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService)
-        )
+        ),
+        LocationRepository(locationManager)
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
+
+    LaunchedEffect(Unit) {
+        if (checkPermissions(context)) {
+            if (isLocationEnabled(context)) {
+                homeViewModel.startLocationUpdates()
+            } else {
+                enableLocationServices(context)
+            }
+        } else {
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(
+                    ACCESS_FINE_LOCATION,
+                    ACCESS_COARSE_LOCATION,
+                ),
+                MY_LOCATION_PERMISSION_ID
+            )
+        }
+    }
+
     RefreshableScreen(
         items = listOf("hello", "world"),
         onRefresh = { },
@@ -87,14 +136,23 @@ fun RefreshableScreen(
     onRefresh: suspend () -> Unit,
     homeViewModel: HomeViewModel
 ) {
-    homeViewModel.getCurrentWeather()
-    homeViewModel.getHourlyWeather()
-    homeViewModel.getDailyWeather()
+    LaunchedEffect(Unit) {
+        homeViewModel.getCurrentWeather()
+        homeViewModel.getHourlyWeather()
+        homeViewModel.getDailyWeather()
+        homeViewModel.stopLocationUpdates()
+    }
+
+    val location by homeViewModel.location.collectAsStateWithLifecycle()
     val currentWeatherState = homeViewModel.currentWeather.observeAsState()
     val messageState = homeViewModel.message.observeAsState()
     val hourlyWeatherMap = homeViewModel.hourlyWeatherMap.observeAsState()
     val dailyWeatherMap = homeViewModel.dailyWeatherMap.observeAsState()
 
+    location?.let {
+        //Text(text = "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
+        Log.d("TAG", "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
+    }
 
     val temperature = currentWeatherState.value
     Log.d(TAG, temperature.toString())
@@ -200,7 +258,7 @@ fun WeatherInfoCard(
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
             Text(
-                  modifier = Modifier.offset(x= screenWidthDp.dp/2 + 40.dp, y = 300.dp/2),
+                modifier = Modifier.offset(x = screenWidthDp.dp / 2 + 40.dp, y = 300.dp / 2),
                 text = "Feels like 15°",
                 fontSize = 14.sp,
             )
@@ -212,7 +270,7 @@ fun WeatherInfoCard(
             ) {
 
                 Row(
-                   Modifier.padding(all = 16.dp)
+                    Modifier.padding(all = 16.dp)
                 ) {
                     Text(
                         text = currentWeather?.city ?: "Default",
@@ -224,12 +282,12 @@ fun WeatherInfoCard(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                        Column {
-                            Text(
-                                text = "20°",
-                                fontSize = 100.sp,
-                            )
-                        }
+                    Column {
+                        Text(
+                            text = "20°",
+                            fontSize = 100.sp,
+                        )
+                    }
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -477,4 +535,35 @@ fun HourlyWeatherColumn(
         )
         Text(temperature)
     }
+}
+
+private fun checkPermissions(context: Context): Boolean {
+    var result = false
+    if ((ContextCompat.checkSelfPermission(
+            context,
+            ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED)
+        ||
+        (ContextCompat.checkSelfPermission(
+            context,
+            ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED)
+    ) {
+        result = true
+    }
+    return result
+}
+
+private fun isLocationEnabled(context: Context): Boolean {
+    val locationManager: LocationManager =
+        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+        LocationManager.NETWORK_PROVIDER
+    )
+}
+
+
+private fun enableLocationServices(context: Context) {
+    Toast.makeText(context, "Turn on location", Toast.LENGTH_SHORT).show()
+    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 }

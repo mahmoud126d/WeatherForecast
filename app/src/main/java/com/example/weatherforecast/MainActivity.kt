@@ -27,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.weatherforecast.alarms.view.AlarmsScreen
 import com.example.weatherforecast.favorites.view.FavoritesScreen
 import com.example.weatherforecast.home.view.HomeScreen
+import com.example.weatherforecast.map.view.MapScreen
 import com.example.weatherforecast.settings.view.SettingsScreen
 import com.example.weatherforecast.ui.theme.WeatherForecastTheme
 import com.example.weatherforecast.utils.Constants
@@ -74,6 +75,7 @@ fun MainScreen(navController: NavHostController) {
             composable(Constants.ALARM_SCREEN) { AlarmsScreen() }
             composable(Constants.FAVORITES_SCREEN) { FavoritesScreen() }
             composable(Constants.SETTINGS_SCREEN) { SettingsScreen() }
+            composable(Constants.MAP_SCREEN) { MapScreen() }
         }
     }
 }
@@ -89,7 +91,7 @@ fun TopAppBar(navController: NavController) {
 
 @Composable
 fun BottomNavBar(navController: NavController) {
-    val items = listOf(Screen.Home, Screen.Alarm, Screen.Favorite, Screen.Settings)
+    val items = listOf(Screen.Home, Screen.Alarm, Screen.Favorite, Screen.Settings,Screen.Map)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 

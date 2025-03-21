@@ -82,11 +82,16 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     //navigation
-    implementation(libs.androidx.navigation.compose.v289)
+    //implementation(libs.androidx.navigation.compose.v289)
     //pull to refresh
     implementation (libs.accompanist.swiperefresh)
     //for make content extend on top of screen
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
-
-
+    //data store
+    implementation("androidx.datastore:datastore-preferences:1.1.3")
+    //navigation
+    implementation("androidx.navigation:navigation-compose:2.8.8")
+    //google maps
+    implementation ("com.google.maps.android:maps-compose:2.11.4")
+    implementation ("com.google.android.gms:play-services-maps:18.1.0")
 }

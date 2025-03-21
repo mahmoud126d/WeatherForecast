@@ -1,5 +1,6 @@
 package com.example.weatherforecast.home.viewmodel
 
+import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,16 +10,19 @@ import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
+import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "HomeViewModel"
 
 class HomeViewModel(
-    private var repo: CurrentWeatherRepository
+    private var repo: CurrentWeatherRepository,
+    private var locationRepo :LocationRepository
 ) : ViewModel() {
 
     private val _currentWeather = MutableLiveData<CurrentWeather>()
@@ -33,11 +37,14 @@ class HomeViewModel(
     private val _dailyWeatherMap = MutableLiveData<Map<String, String>>()
     val dailyWeatherMap: LiveData<Map<String, String>> = _dailyWeatherMap
 
+    val location: StateFlow<Location?> = locationRepo.locationFlow
+
     private val appId = Constants.API_KEY
     private val lat = Constants.LAT
     private val lon = Constants.LON
 
     fun getCurrentWeather() {
+        Log.d(TAG, "getCurrentWeather: ")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = repo.getCurrentWeather(lat, lon, appId)
@@ -109,7 +116,13 @@ class HomeViewModel(
         }
     }
 
+    fun startLocationUpdates() {
+        locationRepo.startLocationUpdates()
+    }
 
+    fun stopLocationUpdates() {
+        locationRepo.stopLocationUpdates()
+    }
 }
 
 

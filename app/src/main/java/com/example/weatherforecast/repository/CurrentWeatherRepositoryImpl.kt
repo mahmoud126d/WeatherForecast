@@ -3,6 +3,7 @@ package com.example.weatherforecast.repository
 import com.example.weatherforecast.model.CurrentWeatherResponse
 import com.example.weatherforecast.model.FiveDaysWeatherResponse
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSource
+import kotlinx.coroutines.flow.Flow
 
 class CurrentWeatherRepositoryImpl private constructor(
     private val currentWeatherRemoteRepository: CurrentWeatherRemoteDataSource
@@ -11,7 +12,7 @@ class CurrentWeatherRepositoryImpl private constructor(
         lat: Double,
         lon: Double,
         appId: String
-    ): CurrentWeatherResponse? {
+    ): Flow<CurrentWeatherResponse> {
         return currentWeatherRemoteRepository.getCurrentWeather(lat, lon, appId)
     }
 
@@ -19,7 +20,7 @@ class CurrentWeatherRepositoryImpl private constructor(
         lat: Double,
         lon: Double,
         appId: String
-    ): FiveDaysWeatherResponse? {
+    ): Flow<FiveDaysWeatherResponse> {
         return currentWeatherRemoteRepository.getFiveDaysWeather(lat, lon, appId)
     }
 

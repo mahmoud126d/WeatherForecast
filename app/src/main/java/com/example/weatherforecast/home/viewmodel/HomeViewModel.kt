@@ -6,19 +6,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
+import com.example.weatherforecast.model.toHourlyWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.DateUtils
+import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val TAG = "HomeViewModel"
 
@@ -28,17 +31,18 @@ class HomeViewModel(
     private var settingsRepository: SettingsRepository
 ) : ViewModel() {
 
-    private val _currentWeather = MutableLiveData<CurrentWeather>()
-    val currentWeather: LiveData<CurrentWeather> = _currentWeather
+
+    private val _currentWeather = MutableStateFlow<Response>(Response.Loading)
+    val currentWeather = _currentWeather.asStateFlow()
 
     private val _message = MutableLiveData("")
     val message: LiveData<String> = _message
 
-    private val _hourlyWeatherMap = MutableLiveData<List<DayWeather>>()
-    val hourlyWeatherMap: LiveData<List<DayWeather>> = _hourlyWeatherMap
+    private val _hourlyWeather = MutableStateFlow<Response>(Response.Loading)
+    val hourlyWeather= _hourlyWeather.asStateFlow()
 
-    private val _dailyWeatherMap = MutableLiveData<List<DayWeather>>()
-    val dailyWeatherMap: LiveData<List<DayWeather>> = _dailyWeatherMap
+    private val _dailyWeather = MutableStateFlow<Response>(Response.Loading)
+    val dailyWeather = _dailyWeather.asStateFlow()
 
     val location: StateFlow<Location?> = locationRepo.locationFlow
 
@@ -52,17 +56,14 @@ class HomeViewModel(
             try {
                 val response = repo.getCurrentWeather(lat, lon, appId)
 
-                if (response != null) {
-                    val currentWeather = response.toCurrentWeather()
-                    _currentWeather.postValue(currentWeather)
-                    _message.postValue("Weather data fetched successfully")
-                } else {
-                    _message.postValue("Failed to fetch weather data: Response is null")
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _message.postValue("Failed to fetch weather data: ${e.message}")
+                response
+                    .catch { ex ->
+                        _currentWeather.value = Response.Failure(ex)
+                    }.collect {
+                        _currentWeather.value = Response.Success(it.toCurrentWeather())
+                    }
+            } catch (ex: Exception) {
+                _currentWeather.value = Response.Failure(ex)
             }
         }
     }
@@ -74,58 +75,50 @@ class HomeViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = repo.getFiveDaysWeather(lat, lon, appId)
-                if (response != null) {
-                    val currentWeather = response.toFiveDaysWeather()
-                    val dayWeather: List<DayWeather> = currentWeather
-                        .take(8)
-                        .map {
-                            DayWeather(
-                                temp = it.temperature,
-                                icon = it.icon,
-                                time = DateUtils.extractTime(it.date)
-                            )
+                response
+                    .catch { ex ->
+                        _hourlyWeather.value = Response.Failure(ex)
+                    }.collect {
+                        val weatherData = it.toHourlyWeather()
+                        weatherData.listOfHourlyWeather = weatherData.listOfHourlyWeather.take(8).map { list ->
+                            list.time = DateUtils.extractTime(list.time)
+                            list
                         }
-
-
-                    withContext(Dispatchers.Main) {
-                        _hourlyWeatherMap.value = dayWeather
+                        _hourlyWeather.value = Response.Success(weatherData)
                     }
-                } else {
-                    Log.d(TAG, "Error fetching weather data")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (ex: Exception) {
+                _hourlyWeather.value = Response.Failure(ex)
             }
         }
     }
+
 
     fun getDailyWeather() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val response = repo.getFiveDaysWeather(lat, lon, appId)
-                if (response != null) {
-                    val currentWeather = response.toFiveDaysWeather()
+                response
+                    .catch { ex ->
+                        _dailyWeather.value = Response.Failure(ex)
+                    }.collect {
+                        val weatherData = it.toFiveDaysWeather()
 
-                    val dailyWeather: List<DayWeather> = currentWeather
-                        .groupBy { DateUtils.extractDay(it.date) }
-                        .map { (day, entries) ->
-                            val avgTemp = entries.map { it.temperature }.average()
-                            val icon = entries.first().icon
+                        val groupedByDay = weatherData.listOfDayWeather.groupBy { item ->
+                            DateUtils.extractDay(item.time)
+                        }
+                        val dailyAverages = groupedByDay.map { (day, readings) ->
                             DayWeather(
-                                temp = avgTemp,
-                                icon = icon,
+                                temp = readings.map { it.temp }.average(),
+                                icon = readings.groupingBy { it.icon }.eachCount().maxByOrNull { it.value }?.key ?: "",
                                 time = day
                             )
                         }
 
-                    withContext(Dispatchers.Main) {
-                        _dailyWeatherMap.value = dailyWeather
+                        val averagedData = weatherData.copy(listOfDayWeather = dailyAverages)
+                        _dailyWeather.value = Response.Success(averagedData)
                     }
-                } else {
-                    Log.d(TAG, "Error fetching weather data")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (ex: Exception) {
+                _dailyWeather.value = Response.Failure(ex)
             }
         }
     }

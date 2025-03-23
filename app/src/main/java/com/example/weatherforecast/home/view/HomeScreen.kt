@@ -36,6 +36,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -65,14 +66,12 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.home.viewmodel.HomeViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModelFactory
 import com.example.weatherforecast.model.CurrentWeather
-import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
-import java.text.NumberFormat
-import java.util.Locale
+import com.example.weatherforecast.utils.Response
 
 private const val TAG = "HomeScreen"
 
@@ -133,14 +132,14 @@ fun RefreshableScreen(
         homeViewModel.getCurrentWeather()
         homeViewModel.getHourlyWeather()
         homeViewModel.getDailyWeather()
-        homeViewModel.stopLocationUpdates()
+        //homeViewModel.stopLocationUpdates()
     }
 
     val location by homeViewModel.location.collectAsStateWithLifecycle()
-    val currentWeatherState = homeViewModel.currentWeather.observeAsState()
+    val currentWeatherState = homeViewModel.currentWeather.collectAsState()
     val messageState = homeViewModel.message.observeAsState()
-    val hourlyWeatherMap = homeViewModel.hourlyWeatherMap.observeAsState()
-    val dailyWeatherMap = homeViewModel.dailyWeatherMap.observeAsState()
+    val hourlyWeather = homeViewModel.hourlyWeather.collectAsState()
+    val dailyWeather = homeViewModel.dailyWeather.collectAsState()
 
     location?.let {
         //Text(text = "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
@@ -169,82 +168,113 @@ fun RefreshableScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
 
             ) {
-            item {
-                WeatherInfoCard(
-                    currentWeatherState.value,
-                    contentDescription = "",
-                    formattedDateTime = homeViewModel.getDateTime()
-                )
-            }
-            item {
-                currentWeatherState.value?.speed?.let {
-                    currentWeatherState.value?.cloud?.let { it1 ->
-                        currentWeatherState.value?.pressure?.let { it2 ->
-                            currentWeatherState.value?.humidity?.let { it3 ->
-                                WeatherStateGrid(
-                                    windSpeed = it,
-                                    clouds = it1,
-                                    pressure = it2,
-                                    humidity = it3,
-                                    homeViewModel
-                                )
-                            }
+            when (val currentWeather = currentWeatherState.value) {
+                is Response.Loading -> {
+                    Log.d(TAG, "Loading")
+                }
+
+                is Response.Success -> {
+                    val currentWeatherResponse = currentWeather.data
+
+                        item {
+                            WeatherInfoCard(
+                                currentWeatherResponse,
+                                contentDescription = "",
+                                formattedDateTime = homeViewModel.getDateTime(),
+                                homeViewModel = homeViewModel
+                            )
                         }
+                        item {
+                            WeatherStateGrid(
+                                windSpeed = currentWeatherResponse.speed,
+                                clouds = currentWeatherResponse.cloud,
+                                pressure = currentWeatherResponse.pressure,
+                                humidity = currentWeatherResponse.humidity,
+                                homeViewModel
+                            )
+                        }
+
+
+                }
+
+                is Response.Failure -> {
+                    Log.d(TAG, "failed")
+                }
+            }
+            when(val hourlyWeather2 = hourlyWeather.value){
+                is Response.Failure -> {
+
+                }
+                Response.Loading -> {
+
+                }
+                is Response.Success -> {
+                    val currentWeather = hourlyWeather2.data
+                    item {
+                        WeatherPeriodBox(
+                            stringResource(R.string.hourly_forecast),
+                            painterResource(R.drawable.clock),
+                            currentWeather,
+                            homeViewModel
+                        )
+
                     }
                 }
             }
-            item {
-                hourlyWeatherMap.value?.let {
-                    WeatherPeriodBox(
-                        stringResource(R.string.hourly_forecast),
-                        painterResource(R.drawable.clock),
-                        it,
-                        homeViewModel
-                    )
+            when(val dailyWeather2 = dailyWeather.value){
+                is Response.Failure -> {
+
                 }
-            }
-            item {
-                dailyWeatherMap.value?.let {
-                    WeatherPeriodBox(
-                        stringResource(R.string.day_forecast),
-                        painterResource(R.drawable.clock),
-                        it,
-                        homeViewModel
-                    )
+                Response.Loading -> {
+
+                }
+                is Response.Success -> {
+                    val currentWeather = dailyWeather2.data
+                    item {
+                        WeatherPeriodBox(
+                            stringResource(R.string.day_forecast),
+                            painterResource(R.drawable.clock),
+                            currentWeather,
+                            homeViewModel
+                        )
+
+                    }
                 }
             }
         }
-
-        PullToRefreshContainer(
-            state = pullToRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
     }
-}
 
-@Preview(showSystemUi = true, device = Devices.PIXEL_4)
-@Composable
-fun WeatherInfoCardPreview() {
-    WeatherInfoCard(
-        CurrentWeather(
-            temperature = 22.0,
-            humidity = 11,
-            description = "decription",
-            pressure = 12,
-            city = "Suez",
-            speed = 434.0,
-            cloud = 123,
-            icon = ""
-        ), "January 18, 16:14",
-        contentDescription = ""
+    PullToRefreshContainer(
+        state = pullToRefreshState,
+        //modifier = Modifier.align(Alignment.TopCenter)
     )
 }
 
+
+//@Preview(showSystemUi = true, device = Devices.PIXEL_4)
+//@Composable
+//fun WeatherInfoCardPreview() {
+//    WeatherInfoCard(
+//        CurrentWeather(
+//            temperature = 22.0,
+//            humidity = 11,
+//            description = "decription",
+//            pressure = 12,
+//            city = "Suez",
+//            speed = 434.0,
+//            cloud = 123,
+//            icon = ""
+//        ), "January 18, 16:14",
+//        contentDescription = ""
+//    )
+//}
+
 @Composable
 fun WeatherInfoCard(
-    currentWeather: CurrentWeather?,
+    currentWeather: CurrentWeather,
     formattedDateTime: String,
-    contentDescription: String
+    contentDescription: String,
+    homeViewModel: HomeViewModel
 ) {
     // Get the current configuration
     val configuration = LocalConfiguration.current
@@ -277,7 +307,7 @@ fun WeatherInfoCard(
                     Modifier.padding(all = 16.dp)
                 ) {
                     Text(
-                        text = currentWeather?.city ?: "Default",
+                        text = currentWeather.city,
                         fontSize = 22.sp
                     )
                 }
@@ -288,7 +318,7 @@ fun WeatherInfoCard(
                 ) {
                     Column {
                         Text(
-                            text = "20°",
+                            text = homeViewModel.formatNumber(currentWeather.temperature)  ,
                             fontSize = 100.sp,
                         )
                     }
@@ -313,7 +343,7 @@ fun WeatherInfoCard(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = currentWeather?.description ?: "",
+                            text = currentWeather.description,
                             fontSize = 22.sp
                         )
                     }
@@ -476,9 +506,10 @@ fun WeatherStateCard(
 fun WeatherPeriodBox(
     title: String,
     icon: Painter,
-    periodWeatherMap: List<DayWeather>,
+    currentWeather: CurrentWeather,
     homeViewModel: HomeViewModel
 ) {
+    val title2 = stringResource(R.string.hourly_forecast)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -515,13 +546,25 @@ fun WeatherPeriodBox(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(periodWeatherMap.size) { index ->
-                    HourlyWeatherColumn(
-                        periodWeatherMap[index].time,
-                        painterResource(R.drawable.cloudandsun),
-                        homeViewModel.formatNumber(periodWeatherMap[index].temp)
-                    )
+
+                if(title== title2){
+                    items(currentWeather.listOfHourlyWeather.size) { index ->
+                        HourlyWeatherColumn(
+                            currentWeather.listOfHourlyWeather[index].time,
+                            painterResource(R.drawable.cloudandsun),
+                            homeViewModel.formatNumber(currentWeather.listOfHourlyWeather[index].temp)
+                        )
+                    }
+                }else{
+                    items(currentWeather.listOfDayWeather.size) { index ->
+                        HourlyWeatherColumn(
+                            currentWeather.listOfDayWeather[index].time,
+                            painterResource(R.drawable.cloudandsun),
+                            homeViewModel.formatNumber(currentWeather.listOfDayWeather[index].temp)
+                        )
+                    }
                 }
+
             }
         }
     }

@@ -39,10 +39,11 @@ data class Cloud(
 data class DayWeather(
     val temp:Double,
     val icon:String,
-    val time:String
+    var time:String
 )
+lateinit var currentWeather: CurrentWeather
 fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
-    return CurrentWeather(
+    currentWeather = CurrentWeather(
         temperature = main.temp,
         humidity = main.humidity,
         description = weather.firstOrNull()?.description ?: "No description",
@@ -50,25 +51,36 @@ fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
         pressure = main.pressure,
         city = name,
         speed = wind.speed,
-        icon = weather.firstOrNull()?.icon ?: "No icon"
+        icon = weather.firstOrNull()?.icon ?: "No icon",
     )
+    return currentWeather
 }
 
-fun FiveDaysWeatherResponse.toFiveDaysWeather(): List<CurrentWeather> {
-    val list = mutableListOf<CurrentWeather>()
+fun FiveDaysWeatherResponse.toFiveDaysWeather(): CurrentWeather {
+    val list = mutableListOf<DayWeather>()
     for (current in this.list) {
         list.add(
-            CurrentWeather(
-                temperature = current.main.temp,
-                humidity = current.main.humidity,
-                description = current.weather.firstOrNull()?.description ?: "No description",
-                cloud = current.clouds.all,
-                pressure = current.main.pressure,
-                speed = current.wind.speed,
-                date = current.date,
-                icon = current.weather.firstOrNull()?.icon ?: "No icon"
+            DayWeather(
+                temp = current.main.temp,
+                icon = current.weather.firstOrNull()?.icon ?: "",
+                time = current.date
             )
         )
     }
-    return list
+    currentWeather.listOfDayWeather = list
+    return currentWeather
+}
+fun FiveDaysWeatherResponse.toHourlyWeather(): CurrentWeather {
+    val list = mutableListOf<DayWeather>()
+    for (current in this.list) {
+        list.add(
+            DayWeather(
+                temp = current.main.temp,
+                icon = current.weather.firstOrNull()?.icon ?: "",
+                time = current.date
+            )
+        )
+    }
+    currentWeather.listOfHourlyWeather = list
+    return currentWeather
 }

@@ -9,4 +9,5 @@ data class CurrentWeather(
     val speed:Double,
     val cloud:Int,
     val date:String= "Default Date",
+    val icon:String
 )

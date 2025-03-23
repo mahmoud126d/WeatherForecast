@@ -7,10 +7,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
+import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.DateUtils
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +24,8 @@ private const val TAG = "HomeViewModel"
 
 class HomeViewModel(
     private var repo: CurrentWeatherRepository,
-    private var locationRepo :LocationRepository
+    private var locationRepo: LocationRepository,
+    private var settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _currentWeather = MutableLiveData<CurrentWeather>()
@@ -31,11 +34,11 @@ class HomeViewModel(
     private val _message = MutableLiveData("")
     val message: LiveData<String> = _message
 
-    private val _hourlyWeatherMap = MutableLiveData<Map<String, String>>()
-    val hourlyWeatherMap: LiveData<Map<String, String>> = _hourlyWeatherMap
+    private val _hourlyWeatherMap = MutableLiveData<List<DayWeather>>()
+    val hourlyWeatherMap: LiveData<List<DayWeather>> = _hourlyWeatherMap
 
-    private val _dailyWeatherMap = MutableLiveData<Map<String, String>>()
-    val dailyWeatherMap: LiveData<Map<String, String>> = _dailyWeatherMap
+    private val _dailyWeatherMap = MutableLiveData<List<DayWeather>>()
+    val dailyWeatherMap: LiveData<List<DayWeather>> = _dailyWeatherMap
 
     val location: StateFlow<Location?> = locationRepo.locationFlow
 
@@ -73,11 +76,16 @@ class HomeViewModel(
                 val response = repo.getFiveDaysWeather(lat, lon, appId)
                 if (response != null) {
                     val currentWeather = response.toFiveDaysWeather()
-                    val dayWeather = currentWeather
+                    val dayWeather: List<DayWeather> = currentWeather
                         .take(8)
-                        .associate {
-                            DateUtils.extractTime(it.date) to it.temperature.toString()
+                        .map {
+                            DayWeather(
+                                temp = it.temperature,
+                                icon = it.icon,
+                                time = DateUtils.extractTime(it.date)
+                            )
                         }
+
 
                     withContext(Dispatchers.Main) {
                         _hourlyWeatherMap.value = dayWeather
@@ -90,6 +98,7 @@ class HomeViewModel(
             }
         }
     }
+
     fun getDailyWeather() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -97,15 +106,20 @@ class HomeViewModel(
                 if (response != null) {
                     val currentWeather = response.toFiveDaysWeather()
 
-                    val dailyWeather = currentWeather
+                    val dailyWeather: List<DayWeather> = currentWeather
                         .groupBy { DateUtils.extractDay(it.date) }
-                        .mapValues { (_, entries) ->
-                            val avgTemp = entries.map { it.temperature }.average() // Calculate average temperature
-                            "${avgTemp.toInt()}°C" // Convert to integer and format as "23°C"
+                        .map { (day, entries) ->
+                            val avgTemp = entries.map { it.temperature }.average()
+                            val icon = entries.first().icon
+                            DayWeather(
+                                temp = avgTemp,
+                                icon = icon,
+                                time = day
+                            )
                         }
 
                     withContext(Dispatchers.Main) {
-                        _dailyWeatherMap.value = dailyWeather // Update LiveData
+                        _dailyWeatherMap.value = dailyWeather
                     }
                 } else {
                     Log.d(TAG, "Error fetching weather data")
@@ -123,6 +137,9 @@ class HomeViewModel(
     fun stopLocationUpdates() {
         locationRepo.stopLocationUpdates()
     }
+
+    fun formatNumber(number: Double) = settingsRepository.formatNumber(number)
+
 }
 
 

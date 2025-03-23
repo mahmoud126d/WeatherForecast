@@ -25,7 +25,8 @@ data class Main(
 )
 
 data class Weather(
-    val description: String
+    val description: String,
+    val icon:String
 )
 
 data class WindSpeed(
@@ -35,16 +36,21 @@ data class WindSpeed(
 data class Cloud(
     val all: Int
 )
-
+data class DayWeather(
+    val temp:Double,
+    val icon:String,
+    val time:String
+)
 fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
     return CurrentWeather(
-        temperature = this.main.temp,
-        humidity = this.main.humidity,
-        description = this.weather.firstOrNull()?.description ?: "No description",
-        cloud = this.clouds.all,
-        pressure = this.main.pressure,
-        city = this.name,
-        speed = this.wind.speed,
+        temperature = main.temp,
+        humidity = main.humidity,
+        description = weather.firstOrNull()?.description ?: "No description",
+        cloud = clouds.all,
+        pressure = main.pressure,
+        city = name,
+        speed = wind.speed,
+        icon = weather.firstOrNull()?.icon ?: "No icon"
     )
 }
 
@@ -59,7 +65,8 @@ fun FiveDaysWeatherResponse.toFiveDaysWeather(): List<CurrentWeather> {
                 cloud = current.clouds.all,
                 pressure = current.main.pressure,
                 speed = current.wind.speed,
-                date = current.date
+                date = current.date,
+                icon = current.weather.firstOrNull()?.icon ?: "No icon"
             )
         )
     }

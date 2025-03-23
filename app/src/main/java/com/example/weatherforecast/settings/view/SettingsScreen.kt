@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.R
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.settings.viewmodel.SettingsViewModel
 import com.example.weatherforecast.settings.viewmodel.SettingsViewModelFactory
@@ -112,7 +114,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Language",
+                text = stringResource(R.string.language),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -125,7 +127,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             RadioButtonRow(
-                "Arabic",
+                stringResource(R.string.arabic),
                 "arabic",
                 language ?: "english"
             ) {
@@ -133,7 +135,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 settingsViewModel.saveLanguage("arabic")
             }
             RadioButtonRow(
-                "English",
+                stringResource(R.string.english),
                 "english",
                 language ?: "english"
             ) {
@@ -168,7 +170,7 @@ fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Temp Unit",
+                text = stringResource(R.string.temp_unit),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -181,21 +183,21 @@ fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             RadioButtonRow(
-                "Celsius°C",
+                stringResource(R.string.celsius_c),
                 "celsius",
                 tempUnit ?: "celsius"
             ) {
                 settingsViewModel.saveTemperatureUnit("celsius")
             }
             RadioButtonRow(
-                "Kelvin°K",
+                stringResource(R.string.kelvin_k),
                 "kelvin",
                 tempUnit ?: "celsius"
             ) {
                 settingsViewModel.saveTemperatureUnit("kelvin")
             }
             RadioButtonRow(
-                "Fahrenheit °F",
+                stringResource(R.string.fahrenheit_f),
                 "fahrenheit",
                 tempUnit ?: "celsius"
             ) {

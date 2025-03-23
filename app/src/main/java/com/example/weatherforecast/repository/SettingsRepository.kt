@@ -5,7 +5,10 @@ import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
 
 
-class SettingsRepository(private val dataStoreManager: DataStoreManager,private val languageChangeHelper: LanguageChangeHelper) {
+class SettingsRepository(
+    private val dataStoreManager: DataStoreManager,
+    private val languageChangeHelper: LanguageChangeHelper
+) {
     val languageFlow = dataStoreManager.languageFlow
     val temperatureUnitFlow = dataStoreManager.tempUnitFlow
 
@@ -16,6 +19,9 @@ class SettingsRepository(private val dataStoreManager: DataStoreManager,private 
     suspend fun saveTemperatureUnit(unit: String) {
         dataStoreManager.saveTemperatureUnit(unit)
     }
-     fun getDefaultLanguage() = languageChangeHelper.getDefaultLanguage()
-    fun changeLanguage(langCode:String) = languageChangeHelper.changeLanguage(langCode)
+
+    fun getDefaultLanguage(): String = languageChangeHelper.getDefaultLanguage()
+    fun changeLanguage(langCode: String) = languageChangeHelper.changeLanguage(langCode)
+    fun formatNumber(number: Double) = languageChangeHelper.formatNumber(number)
+
 }

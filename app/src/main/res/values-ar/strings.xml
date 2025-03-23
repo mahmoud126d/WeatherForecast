@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">توقعات الطقس</string>
+    <string name="wind_speed">سرعة الرياح</string>
+    <string name="clouds">الغيوم</string>
+    <string name="pressure">الضغط</string>
+    <string name="humidity">الرطوبة</string>
+    <string name="hourly_forecast">التوقعات لكل ساعة</string>
+    <string name="day_forecast">توقعات اليوم</string>
+    <string name="language">اللغة</string>
+    <string name="temp_unit">وحده درجة الحرارة</string>
+    <string name="arabic">العربية</string>
+    <string name="english">الإنجليزية</string>
+    <string name="celsius_c">درجة مئوية °C</string>
+    <string name="kelvin_k">كلفن °K</string>
+    <string name="fahrenheit_f">فهرنهايت °F</string>
+
+</resources>

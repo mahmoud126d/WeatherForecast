@@ -1,15 +1,12 @@
 package com.example.weatherforecast.home.view
 
-import android.Manifest
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -24,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -49,43 +44,35 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.LastBaseline
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherforecast.DataStoreManager
+import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.home.viewmodel.HomeViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModelFactory
 import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import com.example.weatherforecast.repository.SettingsRepository
+import java.text.NumberFormat
+import java.util.Locale
 
 private const val TAG = "HomeScreen"
 
@@ -95,11 +82,17 @@ private const val MY_LOCATION_PERMISSION_ID = 5005
 fun HomeScreen() {
     val context = LocalContext.current
     val locationManager = com.example.weatherforecast.LocationManager(context)
+    val settingRepository = SettingsRepository(
+        DataStoreManager(context.applicationContext),
+        LanguageChangeHelper(context)
+    )
     val factory = HomeViewModelFactory(
         CurrentWeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService)
         ),
-        LocationRepository(locationManager)
+        LocationRepository(locationManager),
+        settingRepository
+
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
 
@@ -184,26 +177,41 @@ fun RefreshableScreen(
                 )
             }
             item {
-                WeatherStateGrid(
-                    windSpeed = currentWeatherState.value?.speed,
-                    clouds = currentWeatherState.value?.cloud,
-                    pressure = currentWeatherState.value?.pressure,
-                    humidity = currentWeatherState.value?.humidity
-                )
+                currentWeatherState.value?.speed?.let {
+                    currentWeatherState.value?.cloud?.let { it1 ->
+                        currentWeatherState.value?.pressure?.let { it2 ->
+                            currentWeatherState.value?.humidity?.let { it3 ->
+                                WeatherStateGrid(
+                                    windSpeed = it,
+                                    clouds = it1,
+                                    pressure = it2,
+                                    humidity = it3,
+                                    homeViewModel
+                                )
+                            }
+                        }
+                    }
+                }
             }
             item {
-                WeatherPeriodBox(
-                    "Hourly forecast",
-                    painterResource(R.drawable.clock),
-                    hourlyWeatherMap.value
-                )
+                hourlyWeatherMap.value?.let {
+                    WeatherPeriodBox(
+                        stringResource(R.string.hourly_forecast),
+                        painterResource(R.drawable.clock),
+                        it,
+                        homeViewModel
+                    )
+                }
             }
             item {
-                WeatherPeriodBox(
-                    "Day forecast",
-                    painterResource(R.drawable.clock),
-                    dailyWeatherMap.value
-                )
+                dailyWeatherMap.value?.let {
+                    WeatherPeriodBox(
+                        stringResource(R.string.day_forecast),
+                        painterResource(R.drawable.clock),
+                        it,
+                        homeViewModel
+                    )
+                }
             }
         }
 
@@ -225,7 +233,8 @@ fun WeatherInfoCardPreview() {
             pressure = 12,
             city = "Suez",
             speed = 434.0,
-            cloud = 123
+            cloud = 123,
+            icon = ""
         ), "January 18, 16:14",
         contentDescription = ""
     )
@@ -257,11 +266,6 @@ fun WeatherInfoCard(
         )
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
-            Text(
-                modifier = Modifier.offset(x = screenWidthDp.dp / 2 + 40.dp, y = 300.dp / 2),
-                text = "Feels like 15°",
-                fontSize = 14.sp,
-            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -323,10 +327,11 @@ fun WeatherInfoCard(
 //@Preview(showSystemUi = true)
 @Composable
 fun WeatherStateGrid(
-    windSpeed: Double?,
-    clouds: Int?,
-    pressure: Int?,
-    humidity: Int?
+    windSpeed: Double,
+    clouds: Int,
+    pressure: Int,
+    humidity: Int,
+    homeViewModel: HomeViewModel
 ) {
     Column(
         modifier = Modifier
@@ -340,17 +345,19 @@ fun WeatherStateGrid(
             WeatherStateCard(
                 painterResource(R.drawable.air),
                 "description",
-                "Wind Speed",
-                "$windSpeed",
-                modifier = Modifier.weight(1f)
+                stringResource(R.string.wind_speed),
+                windSpeed,
+                modifier = Modifier.weight(1f),
+                homeViewModel
             )
             Spacer(Modifier.width(16.dp))
             WeatherStateCard(
                 painterResource(R.drawable.rainy),
                 "description",
-                "Clouds",
-                "$clouds",
-                modifier = Modifier.weight(1f)
+                stringResource(R.string.clouds),
+                clouds.toDouble(),
+                modifier = Modifier.weight(1f),
+                homeViewModel
             )
         }
         Spacer(Modifier.height(16.dp))
@@ -362,17 +369,19 @@ fun WeatherStateGrid(
             WeatherStateCard(
                 painterResource(R.drawable.waves),
                 "description",
-                "Pressure",
-                "$pressure",
-                modifier = Modifier.weight(1f)
+                stringResource(R.string.pressure),
+                pressure.toDouble(),
+                modifier = Modifier.weight(1f),
+                homeViewModel
             )
             Spacer(Modifier.width(16.dp))
             WeatherStateCard(
                 painterResource(R.drawable.air),
                 "description",
-                "Humidity",
-                "$humidity",
-                modifier = Modifier.weight(1f)
+                stringResource(R.string.humidity),
+                humidity.toDouble(),
+                modifier = Modifier.weight(1f),
+                homeViewModel
             )
         }
     }
@@ -383,8 +392,9 @@ fun WeatherStateCard(
     icon: Painter,
     contentDescription: String,
     title: String,
-    value: String,
-    modifier: Modifier = Modifier
+    value: Double,
+    modifier: Modifier = Modifier,
+    homeViewModel: HomeViewModel
 ) {
     // Use BoxWithConstraints to get available width
     Box(
@@ -439,7 +449,8 @@ fun WeatherStateCard(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = value,
+                        text = homeViewModel.formatNumber(value),
+
                     )
                 }
 
@@ -450,22 +461,23 @@ fun WeatherStateCard(
 }
 
 //@Preview(showSystemUi = true)
-@Composable
-fun WeatherStateCardPreview() {
-    WeatherStateCard(
-        painterResource(R.drawable.air),
-        "description",
-        "Wind Speed",
-        "12Km/h",
-    )
-}
+//@Composable
+//fun WeatherStateCardPreview() {
+//    WeatherStateCard(
+//        painterResource(R.drawable.air),
+//        "description",
+//        "Wind Speed",
+//        "12Km/h",
+//    )
+//}
 
 //@Preview(showSystemUi = true, device = Devices.PIXEL_4)
 @Composable
 fun WeatherPeriodBox(
     title: String,
     icon: Painter,
-    periodWeatherMap: Map<String, String>?
+    periodWeatherMap: List<DayWeather>,
+    homeViewModel: HomeViewModel
 ) {
     Box(
         modifier = Modifier
@@ -503,18 +515,17 @@ fun WeatherPeriodBox(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(periodWeatherMap?.size ?: 0) { index ->
+                items(periodWeatherMap.size) { index ->
                     HourlyWeatherColumn(
-                        periodWeatherMap?.keys?.elementAt(index) ?: "",
+                        periodWeatherMap[index].time,
                         painterResource(R.drawable.cloudandsun),
-                        (periodWeatherMap?.values?.elementAt(index) ?: "").toString()
+                        homeViewModel.formatNumber(periodWeatherMap[index].temp)
                     )
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun HourlyWeatherColumn(

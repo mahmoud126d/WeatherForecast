@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import java.text.NumberFormat
 import java.util.Locale
 
 class LanguageChangeHelper(private val context: Context) {
@@ -21,4 +22,8 @@ class LanguageChangeHelper(private val context: Context) {
     }
 
     fun getDefaultLanguage() = Locale.getDefault().language
+    fun formatNumber(value: Double): String {
+        val formatter = NumberFormat.getInstance(Locale.getDefault())
+        return formatter.format(value)
+    }
 }

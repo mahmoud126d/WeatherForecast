@@ -22,7 +22,7 @@ class LanguageChangeHelper(private val context: Context) {
     }
 
     fun getDefaultLanguage() = Locale.getDefault().language
-    fun formatNumber(value: Double): String {
+    fun formatNumber(value: Int): String {
         val formatter = NumberFormat.getInstance(Locale.getDefault())
         return formatter.format(value)
     }

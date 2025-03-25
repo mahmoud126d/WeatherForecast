@@ -33,6 +33,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.map.viewmodel.MapViewModel
 import com.example.weatherforecast.map.viewmodel.MapViewModelFactory
 import com.example.weatherforecast.repository.LocationRepository
@@ -46,15 +47,19 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlin.properties.Delegates
 
-var long by Delegates.notNull<Double>()
-var lat by Delegates.notNull<Double>()
-
+// MapScreen now takes custom parameters for button text and onClick
 @Composable
-fun MapScreen(modifier: Modifier = Modifier, navController: NavHostController) {
-
+fun MapScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    buttonText: String = "Select Location",
+    onButtonClick: (Double, Double) -> Unit = { lat, lng ->
+        // Default implementation if no custom handler is provided
+        navController.navigateUp()
+    }
+) {
     val context = LocalContext.current
-    val locationManager = com.example.weatherforecast.LocationManager(context)
-    val locationRepository = LocationRepository(locationManager)
+    val locationManager = LocationManager(context)
     val factory = MapViewModelFactory(
         LocationRepository(locationManager),
         SettingsRepository(
@@ -63,28 +68,61 @@ fun MapScreen(modifier: Modifier = Modifier, navController: NavHostController) {
         )
     )
     val mapViewModel: MapViewModel = viewModel(factory = factory)
+
+    // Local state for latitude & longitude
+    var latLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
+
+    Map(
+        modifier = modifier,
+        navController = navController,
+        buttonText = buttonText,
+        onButtonClick = {
+            onButtonClick(latLng.latitude, latLng.longitude)
+            mapViewModel.saveLatitude(latLng.latitude)
+            mapViewModel.saveLongitude(latLng.longitude)
+        },
+        mapViewModel = mapViewModel,
+        onLocationSelected = { newLatLng ->
+            latLng = newLatLng
+        }
+    )
+}
+
+// Map composable modified to accept custom button text
+@Composable
+fun Map(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    buttonText: String,
+    onButtonClick: () -> Unit,
+    mapViewModel: MapViewModel,
+    onLocationSelected: (LatLng) -> Unit
+) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .wrapContentSize()
     ) {
-        GoogleMapScreen(mapViewModel)
+        GoogleMapScreen(mapViewModel, onLocationSelected)
         LocationSelectionCard(
             navController = navController,
             mapViewModel = mapViewModel,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
+                .padding(16.dp),
+            buttonText = buttonText,
+            onButtonClick = onButtonClick
         )
     }
 }
 
+// GoogleMapScreen remains the same as in your original implementation
 @Composable
-fun GoogleMapScreen(mapViewModel: MapViewModel) {
-
-    // Use mutableStateOf with a unique key for each marker position
-    var markerId by remember { mutableStateOf(0) }
+fun GoogleMapScreen(
+    mapViewModel: MapViewModel,
+    onLocationSelected: (LatLng) -> Unit
+) {
     var markerPosition by remember { mutableStateOf(LatLng(0.0, 0.0)) }
 
     val cameraPositionState = rememberCameraPositionState {
@@ -95,43 +133,32 @@ fun GoogleMapScreen(mapViewModel: MapViewModel) {
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         onMapClick = { latLng ->
-            // Update marker position AND increment ID to force recomposition
             markerPosition = latLng
-            markerId++  // This forces the marker to be recreated
-
+            onLocationSelected(latLng)
             mapViewModel.askForAddress(latLng.latitude, latLng.longitude)
-            long =  latLng.longitude
-            lat =  latLng.latitude
-            Log.d("TAG", "GoogleMapScreen: Marker placed at $latLng (ID: $markerId)")
         }
     ) {
-        // Use the key parameter with markerId to force the Marker to be recreated
-        key(markerId) {
-            Marker(
-                state = MarkerState(position = markerPosition),
-                title = "Selected Location",
-                snippet = "Location #$markerId"
-            )
-        }
+        Marker(
+            state = MarkerState(position = markerPosition),
+            title = "Selected Location"
+        )
     }
-//    address?.let {
-//        //Text(text = "Latitude: ${it.latitude}, Longitude: ${it.longitude}")
-//        Log.d("TAG", "address: ${it.getAddressLine(0)}")
-//    }
 }
 
-
+// LocationSelectionCard now accepts custom button text
 @Composable
 fun LocationSelectionCard(
-    modifier: Modifier = Modifier, // 👈 Added modifier parameter
+    modifier: Modifier = Modifier,
     navController: NavController,
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
+    buttonText: String,
+    onButtonClick: () -> Unit
 ) {
     val address by mapViewModel.address.collectAsState()
     val cityName by mapViewModel.cityName.collectAsState()
 
     Card(
-        modifier = modifier // 👈 Use modifier here
+        modifier = modifier
             .fillMaxWidth()
             .height(160.dp)
             .background(Color.Cyan)
@@ -142,16 +169,12 @@ fun LocationSelectionCard(
             verticalArrangement = Arrangement.Center
         ) {
             Button(
-                onClick = {
-                    navController.navigate(Constants.SETTINGS_SCREEN)
-                    mapViewModel.saveLatitude(lat)
-                    mapViewModel.saveLongitude(long)
-                },
+                onClick = onButtonClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                Text("Select Location")
+                Text(buttonText)
             }
             cityName?.let {
                 Text(

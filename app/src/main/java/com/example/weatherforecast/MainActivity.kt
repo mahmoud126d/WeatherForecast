@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherforecast.alarms.view.AlarmsScreen
+import com.example.weatherforecast.favorites.view.FavoriteMapScreen
 import com.example.weatherforecast.favorites.view.FavoritesScreen
 import com.example.weatherforecast.home.view.HomeScreen
 import com.example.weatherforecast.map.view.MapScreen
@@ -73,11 +74,14 @@ fun MainScreen(navController: NavHostController) {
         ) {
             composable(Constants.HOME_SCREEN) { HomeScreen() }
             composable(Constants.ALARM_SCREEN) { AlarmsScreen() }
-            composable(Constants.FAVORITES_SCREEN) { FavoritesScreen() }
+            composable(Constants.FAVORITES_SCREEN) { FavoritesScreen(navController = navController) }
             composable(Constants.SETTINGS_SCREEN) { SettingsScreen(
                 navController = navController
             ) }
             composable(Constants.MAP_SCREEN) { MapScreen(
+                navController = navController
+            ) }
+            composable(Constants.FAVORITE_MAP_SCREEN) { FavoriteMapScreen(
                 navController = navController
             ) }
         }

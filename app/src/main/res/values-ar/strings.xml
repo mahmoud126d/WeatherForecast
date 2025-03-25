@@ -14,6 +14,8 @@
     <string name="standard">قياسي</string>
     <string name="metric">متري</string>
     <string name="imperial">إمبراطوري</string>
-
+    <string name="c">س°</string>
+    <string name="f">ف°</string>
+    <string name="k">ك°</string>
 
 </resources>

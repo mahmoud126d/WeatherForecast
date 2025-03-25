@@ -16,4 +16,7 @@
     <string name="gps">gps</string>
     <string name="map">map</string>
     <string name="location_select">location selection</string>
+    <string name="c">°C</string>
+    <string name="f">°F</string>
+    <string name="k">°K</string>
 </resources>

@@ -33,6 +33,6 @@ class SettingsRepository(
 
     fun getDefaultLanguage(): String = languageChangeHelper.getDefaultLanguage()
     fun changeLanguage(langCode: String) = languageChangeHelper.changeLanguage(langCode)
-    fun formatNumber(number: Double) = languageChangeHelper.formatNumber(number)
+    fun formatNumber(number: Int) = languageChangeHelper.formatNumber(number)
 
 }

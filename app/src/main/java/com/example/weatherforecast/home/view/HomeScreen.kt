@@ -52,8 +52,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -63,6 +61,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.R
+import com.example.weatherforecast.db.WeatherDataBase
+import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.home.viewmodel.HomeViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModelFactory
 import com.example.weatherforecast.model.CurrentWeather
@@ -77,7 +77,7 @@ import kotlinx.coroutines.delay
 private const val TAG = "HomeScreen"
 
 private const val MY_LOCATION_PERMISSION_ID = 5005
-
+lateinit var tempUnitSymbol:String
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
@@ -85,7 +85,10 @@ fun HomeScreen() {
 
     val factory = HomeViewModelFactory(
         CurrentWeatherRepositoryImpl.getInstance(
-            CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService)
+            CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
+            WeatherLocalDataSourceImp(
+                WeatherDataBase.getInstance(context).getWeatherDao()
+            )
         ),
         LocationRepository(locationManager),
         SettingsRepository(
@@ -112,6 +115,12 @@ fun HomeScreen() {
                 ),
                 MY_LOCATION_PERMISSION_ID
             )
+        }
+        val unit = homeViewModel.getTemperatureUnit()
+         tempUnitSymbol = when (unit) {
+            "metric" -> context.getString(R.string.c)
+            "imperial" -> context.getString(R.string.f)
+            else -> context.getString(R.string.k)
         }
     }
 
@@ -273,7 +282,8 @@ fun RefreshableScreen(
 //            cloud = 123,
 //            icon = ""
 //        ), "January 18, 16:14",
-//        contentDescription = ""
+//        contentDescription = "",
+//        homeViewModel = TODO()
 //    )
 //}
 
@@ -291,7 +301,7 @@ fun WeatherInfoCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .height(350.dp)
             .clip(RoundedCornerShape(bottomEnd = 24.dp, bottomStart = 24.dp))
     ) {
 
@@ -308,7 +318,8 @@ fun WeatherInfoCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.SpaceBetween,
+
             ) {
 
                 Row(
@@ -326,7 +337,7 @@ fun WeatherInfoCard(
                 ) {
                     Column {
                         Text(
-                            text = homeViewModel.formatNumber(currentWeather.temperature)  ,
+                            text = "${homeViewModel.formatNumber(currentWeather.temperature.toInt())}${tempUnitSymbol}"  ,
                             fontSize = 100.sp,
                         )
                     }
@@ -352,7 +363,7 @@ fun WeatherInfoCard(
                         Spacer(Modifier.height(8.dp))
                         Text(
                             text = currentWeather.description,
-                            fontSize = 22.sp
+                            fontSize = 24.sp,
                         )
                     }
                 }
@@ -487,7 +498,7 @@ fun WeatherStateCard(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = homeViewModel.formatNumber(value),
+                        text = homeViewModel.formatNumber(value.toInt()),
 
                     )
                 }
@@ -560,7 +571,7 @@ fun WeatherPeriodBox(
                         HourlyWeatherColumn(
                             currentWeather.listOfHourlyWeather[index].time,
                             painterResource(R.drawable.cloudandsun),
-                            homeViewModel.formatNumber(currentWeather.listOfHourlyWeather[index].temp)
+                            "${homeViewModel.formatNumber(currentWeather.listOfHourlyWeather[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
                 }else{
@@ -568,7 +579,7 @@ fun WeatherPeriodBox(
                         HourlyWeatherColumn(
                             currentWeather.listOfDayWeather[index].time,
                             painterResource(R.drawable.cloudandsun),
-                            homeViewModel.formatNumber(currentWeather.listOfDayWeather[index].temp)
+                            "${homeViewModel.formatNumber(currentWeather.listOfHourlyWeather[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
                 }

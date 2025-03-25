@@ -6,6 +6,7 @@ object Constants {
     const val ALARM_SCREEN = "alarm"
     const val SETTINGS_SCREEN = "settings"
     const val MAP_SCREEN = "map"
+    const val FAVORITE_MAP_SCREEN = "favorite_map"
 
     //network
     const val BASE_URL = "https://api.openweathermap.org/"

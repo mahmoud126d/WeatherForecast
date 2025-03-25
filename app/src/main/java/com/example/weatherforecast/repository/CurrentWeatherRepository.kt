@@ -1,5 +1,6 @@
 package com.example.weatherforecast.repository
 
+import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.CurrentWeatherResponse
 import com.example.weatherforecast.model.FiveDaysWeatherResponse
 import kotlinx.coroutines.flow.Flow
@@ -19,4 +20,7 @@ interface CurrentWeatherRepository {
         lang:String,
         appId:String,
     ):Flow<FiveDaysWeatherResponse>
+    suspend fun insertWeather(weather: CurrentWeather):Long
+    suspend fun deleteWeather(weather: CurrentWeather):Int
+    suspend fun getAllWeather(): Flow<List<CurrentWeather>>?
 }

@@ -110,6 +110,7 @@ class HomeViewModel(
     fun getDailyWeather() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+
                 val (latitude, longitude) = getLocationCoordinates()
                 val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
 
@@ -157,12 +158,14 @@ class HomeViewModel(
             )
         }
     }
-
+    suspend fun getTemperatureUnit(): String {
+        return settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+    }
     fun getDateTime() = DateUtils.getFormattedDateTime()
 
     fun startLocationUpdates() = locationRepository.startLocationUpdates()
 
     fun stopLocationUpdates() = locationRepository.stopLocationUpdates()
 
-    fun formatNumber(number: Double) = settingsRepository.formatNumber(number)
+    fun formatNumber(number: Int) = settingsRepository.formatNumber(number)
 }

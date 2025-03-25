@@ -5,6 +5,18 @@ import com.example.weatherforecast.model.FiveDaysWeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 interface CurrentWeatherRemoteDataSource {
-    suspend fun getCurrentWeather(lat: Double, lon: Double, appId: String): Flow<CurrentWeatherResponse>
-    suspend fun getFiveDaysWeather(lat: Double, lon: Double, appId: String): Flow<FiveDaysWeatherResponse>
+    suspend fun getCurrentWeather(
+        lat: Double,
+        lon: Double,
+        unit:String,
+        lang:String,
+        appId:String,
+    ): Flow<CurrentWeatherResponse>
+    suspend fun getFiveDaysWeather(
+        lat: Double,
+        lon: Double,
+        unit:String,
+        lang:String,
+        appId:String,
+    ): Flow<FiveDaysWeatherResponse>
 }

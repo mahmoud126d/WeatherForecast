@@ -11,9 +11,18 @@ interface CurrentWeatherApiService {
     suspend fun getCurrentWeather(
         @Query("lat") lat:Double,
         @Query("lon") lon:Double,
-        @Query("appid") appId:String
+        @Query("units") unit:String,
+        @Query("lang") lang:String,
+        @Query("appid") appId:String,
+
     ): Response<CurrentWeatherResponse>
     @GET("data/2.5/forecast")
-    suspend fun getFiveDaysWeather(@Query("lat") lat:Double,@Query("lon") lon:Double,@Query("appid") appId:String):Response<FiveDaysWeatherResponse>
+    suspend fun getFiveDaysWeather(
+        @Query("lat") lat:Double,
+        @Query("lon") lon:Double,
+        @Query("units") unit:String,
+        @Query("lang") lang:String,
+        @Query("appid") appId:String,
+    ):Response<FiveDaysWeatherResponse>
 
 }

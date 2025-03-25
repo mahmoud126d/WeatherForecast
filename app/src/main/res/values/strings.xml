@@ -8,9 +8,12 @@
     <string name="day_forecast">Day forecast</string>
     <string name="language">Language</string>
     <string name="temp_unit">Temp Unit</string>
-    <string name="arabic">Arabic</string>
-    <string name="english">English</string>
-    <string name="celsius_c">Celsius°C</string>
-    <string name="kelvin_k">Kelvin°K</string>
-    <string name="fahrenheit_f">Fahrenheit °F</string>
+    <string name="ar">ar</string>
+    <string name="en">en</string>
+    <string name="standard">standard</string>
+    <string name="metric">metric</string>
+    <string name="imperial">imperial</string>
+    <string name="gps">gps</string>
+    <string name="map">map</string>
+    <string name="location_select">location selection</string>
 </resources>

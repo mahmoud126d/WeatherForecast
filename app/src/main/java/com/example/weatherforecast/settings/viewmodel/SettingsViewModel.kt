@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(private val settingsRepository: SettingsRepository) : ViewModel() {
     val language: LiveData<String?> = settingsRepository.languageFlow.asLiveData()
     val tempUnit: LiveData<String?> = settingsRepository.temperatureUnitFlow.asLiveData()
+    val locationSelection: LiveData<String?> = settingsRepository.locationSelection.asLiveData()
 
     fun saveLanguage(lang: String) {
         viewModelScope.launch {
@@ -19,6 +20,11 @@ class SettingsViewModel(private val settingsRepository: SettingsRepository) : Vi
     fun saveTemperatureUnit(unit: String) {
         viewModelScope.launch {
             settingsRepository.saveTemperatureUnit(unit)
+        }
+    }
+    fun saveLocationSelection(selection:String){
+        viewModelScope.launch {
+            settingsRepository.saveLocationSelection(selection)
         }
     }
     fun getDefaultLanguage(){

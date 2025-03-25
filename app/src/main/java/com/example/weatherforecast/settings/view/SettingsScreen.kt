@@ -36,17 +36,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.settings.viewmodel.SettingsViewModel
 import com.example.weatherforecast.settings.viewmodel.SettingsViewModelFactory
+import com.example.weatherforecast.utils.Constants
 import java.util.Locale
 
-@Preview(showSystemUi = true, device = Devices.PIXEL_4)
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+fun SettingsScreen(modifier: Modifier = Modifier,navController: NavController) {
     val context = LocalContext.current
     // Create the repository using DataStoreManager
     val repository = SettingsRepository(DataStoreManager(context.applicationContext),LanguageChangeHelper(context))
@@ -69,7 +70,10 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
         TemperatureBox(
             settingsViewModel = settingsViewModel
         )
-
+        LocationBox(
+            settingsViewModel = settingsViewModel,
+            navController = navController
+        )
     }
 }
 
@@ -97,7 +101,17 @@ fun TemperatureBox(modifier: Modifier = Modifier, settingsViewModel: SettingsVie
         TemperatureUnitSelector(settingsViewModel)
     }
 }
-
+@Composable
+fun LocationBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewModel,navController:NavController) {
+    Box(
+        Modifier
+            .padding(20.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.Gray)
+    ) {
+        LocationSelector(settingsViewModel,navController)
+    }
+}
 @Composable
 fun LanguageSelector(settingsViewModel: SettingsViewModel) {
     val language by settingsViewModel.language.observeAsState()
@@ -127,28 +141,20 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             RadioButtonRow(
-                stringResource(R.string.arabic),
-                "arabic",
-                language ?: "english"
+                stringResource(R.string.ar),
+                "ar",
+                language ?: "en"
             ) {
                 settingsViewModel.changeLanguage("ar")
-                settingsViewModel.saveLanguage("arabic")
+                settingsViewModel.saveLanguage("ar")
             }
             RadioButtonRow(
-                stringResource(R.string.english),
-                "english",
-                language ?: "english"
+                stringResource(R.string.en),
+                "en",
+                language ?: "en"
             ) {
                 settingsViewModel.changeLanguage("en")
-                settingsViewModel.saveLanguage("english")
-            }
-            RadioButtonRow(
-                "Default",
-                "default",
-                language ?: "english"
-            ) {
-                settingsViewModel.changeLanguage(settingsViewModel.getDefaultLanguage().toString())
-                settingsViewModel.saveLanguage("default")
+                settingsViewModel.saveLanguage("en")
             }
         }
     }
@@ -183,29 +189,77 @@ fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             RadioButtonRow(
-                stringResource(R.string.celsius_c),
-                "celsius",
-                tempUnit ?: "celsius"
+                stringResource(R.string.metric),
+                "metric",
+                tempUnit ?: "metric"
             ) {
-                settingsViewModel.saveTemperatureUnit("celsius")
+                settingsViewModel.saveTemperatureUnit("metric")
             }
             RadioButtonRow(
-                stringResource(R.string.kelvin_k),
-                "kelvin",
-                tempUnit ?: "celsius"
+                stringResource(R.string.standard),
+                "standard",
+                tempUnit ?: "metric"
             ) {
-                settingsViewModel.saveTemperatureUnit("kelvin")
+                settingsViewModel.saveTemperatureUnit("standard")
             }
             RadioButtonRow(
-                stringResource(R.string.fahrenheit_f),
-                "fahrenheit",
-                tempUnit ?: "celsius"
+                stringResource(R.string.imperial),
+                "imperial",
+                tempUnit ?: "metric"
             ) {
-                settingsViewModel.saveTemperatureUnit("fahrenheit")
+                settingsViewModel.saveTemperatureUnit("imperial")
             }
         }
     }
 }
+
+@Composable
+fun LocationSelector(settingsViewModel: SettingsViewModel,navController:NavController) {
+    val locationSelection by settingsViewModel.locationSelection.observeAsState()
+    val context = LocalContext.current
+    Column(modifier = Modifier.padding(4.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = "Language Icon",
+                tint = Color.Red,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.location_select),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            RadioButtonRow(
+                stringResource(R.string.map),
+                "map",
+                locationSelection ?: "gps"
+            ) {
+                navController.navigate(Constants.MAP_SCREEN)
+                settingsViewModel.saveLocationSelection("map")
+            }
+            RadioButtonRow(
+                stringResource(R.string.gps),
+                "gps",
+                locationSelection ?: "gps"
+            ) {
+                settingsViewModel.saveLocationSelection("gps")
+            }
+        }
+    }
+}
+
 
 @Composable
 fun RadioButtonRow(

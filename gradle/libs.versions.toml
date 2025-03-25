@@ -19,6 +19,7 @@ roomKtx = "2.6.1"
 runtimeLivedata = "1.0.0"
 playServicesLocationVersion = "21.3.0"
 appcompat = "1.7.0"
+storage = "1.5.0"
 
 [libraries]
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwiperefresh" }
@@ -50,6 +51,7 @@ playservices-location = { module = "com.google.android.gms:playservices-location
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocationVersion" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
 
 
 [plugins]

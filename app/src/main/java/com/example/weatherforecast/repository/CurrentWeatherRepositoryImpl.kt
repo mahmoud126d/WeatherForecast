@@ -11,17 +11,33 @@ class CurrentWeatherRepositoryImpl private constructor(
     override suspend fun getCurrentWeather(
         lat: Double,
         lon: Double,
-        appId: String
+        unit:String,
+        lang:String,
+        appId:String,
     ): Flow<CurrentWeatherResponse> {
-        return currentWeatherRemoteRepository.getCurrentWeather(lat, lon, appId)
+        return currentWeatherRemoteRepository.getCurrentWeather(
+            lat ,
+            lon ,
+            unit,
+            lang,
+            appId,
+        )
     }
 
     override suspend fun getFiveDaysWeather(
         lat: Double,
         lon: Double,
-        appId: String
+        unit:String,
+        lang:String,
+        appId:String,
     ): Flow<FiveDaysWeatherResponse> {
-        return currentWeatherRemoteRepository.getFiveDaysWeather(lat, lon, appId)
+        return currentWeatherRemoteRepository.getFiveDaysWeather(
+            lat ,
+            lon ,
+            unit,
+            lang,
+            appId,
+        )
     }
 
     companion object {

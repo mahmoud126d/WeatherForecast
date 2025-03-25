@@ -15,5 +15,4 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Alarm : Screen(Constants.ALARM_SCREEN, "Alarms", Icons.Default.Warning)
     data object Favorite : Screen(Constants.FAVORITES_SCREEN, "Favorites", Icons.Default.Favorite)
     data object Settings : Screen(Constants.SETTINGS_SCREEN, "Settings", Icons.Default.Settings)
-    data object Map : Screen(Constants.MAP_SCREEN, "map", Icons.Default.LocationOn)
 }

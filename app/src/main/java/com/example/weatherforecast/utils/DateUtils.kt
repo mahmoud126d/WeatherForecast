@@ -28,7 +28,7 @@ object DateUtils {
     }
     fun extractDay(dateTime: String): String {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("E", Locale.getDefault()) // "E" gives short day name like "Sun"
+        val outputFormat = SimpleDateFormat("E", Locale.getDefault())
         return try {
             val date = inputFormat.parse(dateTime)
             outputFormat.format(date!!)

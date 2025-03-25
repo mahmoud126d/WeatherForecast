@@ -9,6 +9,7 @@ class LocationRepository(private val locationManager: LocationManager) {
 
     val locationFlow: StateFlow<Location?> = locationManager.locationFlow
     val addressFlow: StateFlow<Address?> = locationManager.addressFlow
+    val cityNameFlow : StateFlow<String?> = locationManager.cityNameFlow
 
     fun startLocationUpdates() {
         locationManager.startLocationUpdates()
@@ -18,6 +19,6 @@ class LocationRepository(private val locationManager: LocationManager) {
         locationManager.stopLocationUpdates()
     }
     fun getAddress(latitude: Double, longitude: Double){
-        locationManager.getAddressFromLocation(latitude,longitude)
+        locationManager.getCityNameFromLocation(latitude,longitude)
     }
 }

@@ -9,10 +9,11 @@
     <string name="day_forecast">توقعات اليوم</string>
     <string name="language">اللغة</string>
     <string name="temp_unit">وحده درجة الحرارة</string>
-    <string name="arabic">العربية</string>
-    <string name="english">الإنجليزية</string>
-    <string name="celsius_c">درجة مئوية °C</string>
-    <string name="kelvin_k">كلفن °K</string>
-    <string name="fahrenheit_f">فهرنهايت °F</string>
+    <string name="ar">العربية</string>
+    <string name="en">الإنجليزية</string>
+    <string name="standard">قياسي</string>
+    <string name="metric">متري</string>
+    <string name="imperial">إمبراطوري</string>
+
 
 </resources>

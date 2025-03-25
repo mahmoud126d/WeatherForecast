@@ -72,6 +72,7 @@ import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Response
+import kotlinx.coroutines.delay
 
 private const val TAG = "HomeScreen"
 
@@ -81,16 +82,16 @@ private const val MY_LOCATION_PERMISSION_ID = 5005
 fun HomeScreen() {
     val context = LocalContext.current
     val locationManager = com.example.weatherforecast.LocationManager(context)
-    val settingRepository = SettingsRepository(
-        DataStoreManager(context.applicationContext),
-        LanguageChangeHelper(context)
-    )
+
     val factory = HomeViewModelFactory(
         CurrentWeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService)
         ),
         LocationRepository(locationManager),
-        settingRepository
+        SettingsRepository(
+            DataStoreManager(context.applicationContext),
+            LanguageChangeHelper(context)
+        )
 
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
@@ -116,7 +117,11 @@ fun HomeScreen() {
 
     RefreshableScreen(
         items = listOf("hello", "world"),
-        onRefresh = { },
+        onRefresh = {
+            homeViewModel.getCurrentWeather()
+            homeViewModel.getHourlyWeather()
+            homeViewModel.getDailyWeather()
+        },
         homeViewModel
     )
 }
@@ -132,7 +137,6 @@ fun RefreshableScreen(
         homeViewModel.getCurrentWeather()
         homeViewModel.getHourlyWeather()
         homeViewModel.getDailyWeather()
-        //homeViewModel.stopLocationUpdates()
     }
 
     val location by homeViewModel.location.collectAsStateWithLifecycle()
@@ -152,8 +156,9 @@ fun RefreshableScreen(
     val pullToRefreshState = rememberPullToRefreshState()
 
     if (pullToRefreshState.isRefreshing) {
-        LaunchedEffect(true) {
+        LaunchedEffect(pullToRefreshState.isRefreshing) {
             onRefresh()
+            delay(500) // Keep the refresh animation visible for a short time
             pullToRefreshState.endRefresh()
         }
     }
@@ -244,10 +249,13 @@ fun RefreshableScreen(
         }
     }
 
-    PullToRefreshContainer(
-        state = pullToRefreshState,
-        //modifier = Modifier.align(Alignment.TopCenter)
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshContainer(
+            state = pullToRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+    }
+
 }
 
 

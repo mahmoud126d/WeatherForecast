@@ -30,15 +30,17 @@ class LocationManager(context: Context) {
     val addressFlow: StateFlow<Address?> = _addressFlow.asStateFlow()
 
     private val geocoder = Geocoder(context, Locale.getDefault())
+    private lateinit var  locationCallback:LocationCallback
 
-
+    private val _cityNameFlow = MutableStateFlow<String?>(null)
+    val cityNameFlow: StateFlow<String?> = _cityNameFlow.asStateFlow()
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(10 * 60 * 1000).apply {
+        val locationRequest = LocationRequest.Builder(60).apply {
             setPriority(Priority.PRIORITY_HIGH_ACCURACY)
         }.build()
-        val locationCallback = object : LocationCallback() {
+        locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 _locationFlow.value = locationResult.lastLocation
             }
@@ -47,31 +49,30 @@ class LocationManager(context: Context) {
     }
 
     fun stopLocationUpdates() {
-       // fusedClient.removeLocationUpdates(locationCallback)
+        fusedClient.removeLocationUpdates(locationCallback)
     }
 
 
 
-    fun getAddressFromLocation(latitude: Double, longitude: Double) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocoder.getFromLocation(latitude, longitude, 1) { addresses ->
-                if (addresses.isNotEmpty()) {
-                    _addressFlow.value = addresses[0]
-                } else {
-                    //_addressFlow.value = addresses[0]
+
+    fun getCityNameFromLocation(latitude: Double, longitude: Double) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                geocoder.getFromLocation(latitude, longitude, 1) { addresses ->
+                    val address = addresses.getOrNull(0)
+                    val city = address?.locality ?: address?.subAdminArea ?: address?.adminArea
+                    _cityNameFlow.value = city ?: "Unknown City"
+                    Log.d("LocationManager", "City Name: $city")
                 }
-            }
-        } else {
-            try {
+            } else {
                 val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-                if (!addresses.isNullOrEmpty()) {
-                    _addressFlow.value = addresses[0]
-                } else {
-                    //callback(null)
-                }
-            } catch (e: IOException) {
-               // callback(null)
+                val address = addresses?.getOrNull(0)
+                val city = address?.locality ?: address?.subAdminArea ?: address?.adminArea
+                _cityNameFlow.value = city ?: "Unknown City"
+                Log.d("LocationManager", "City Name: $city")
             }
+        } catch (e: IOException) {
+            Log.e("LocationManager", "Geocoder failed: ${e.message}")
         }
     }
 

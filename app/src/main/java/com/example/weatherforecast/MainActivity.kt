@@ -74,8 +74,12 @@ fun MainScreen(navController: NavHostController) {
             composable(Constants.HOME_SCREEN) { HomeScreen() }
             composable(Constants.ALARM_SCREEN) { AlarmsScreen() }
             composable(Constants.FAVORITES_SCREEN) { FavoritesScreen() }
-            composable(Constants.SETTINGS_SCREEN) { SettingsScreen() }
-            composable(Constants.MAP_SCREEN) { MapScreen() }
+            composable(Constants.SETTINGS_SCREEN) { SettingsScreen(
+                navController = navController
+            ) }
+            composable(Constants.MAP_SCREEN) { MapScreen(
+                navController = navController
+            ) }
         }
     }
 }
@@ -91,7 +95,7 @@ fun TopAppBar(navController: NavController) {
 
 @Composable
 fun BottomNavBar(navController: NavController) {
-    val items = listOf(Screen.Home, Screen.Alarm, Screen.Favorite, Screen.Settings,Screen.Map)
+    val items = listOf(Screen.Home, Screen.Alarm, Screen.Favorite, Screen.Settings)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 

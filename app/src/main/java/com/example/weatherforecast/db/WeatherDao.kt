@@ -19,4 +19,7 @@ interface WeatherDao {
 
     @Query("SELECT * FROM current_weather")
     fun getAllWeather():Flow<List<CurrentWeather>>
+
+    @Query("SELECT * FROM current_weather WHERE city = :cityName LIMIT 1")
+    fun getWeatherByCity(cityName: String): Flow<CurrentWeather?>
 }

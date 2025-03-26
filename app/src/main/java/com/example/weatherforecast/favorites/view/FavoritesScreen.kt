@@ -1,6 +1,8 @@
 package com.example.weatherforecast.favorites.view
 
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -35,6 +37,7 @@ import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModel
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModelFactory
+import com.example.weatherforecast.home.view.RefreshableScreen
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
@@ -42,6 +45,7 @@ import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.utils.Constants
 import kotlinx.coroutines.flow.collect
 
+lateinit var  favoritesViewModel: FavoritesViewModel
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
@@ -57,7 +61,7 @@ fun FavoritesScreen(
             )
         )
     )
-    val favoritesViewModel: FavoritesViewModel = viewModel(factory = factory)
+     favoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
         favoritesViewModel.getAllFavorites()
         favoritesViewModel.toastEvent.collect{
@@ -83,14 +87,14 @@ fun FavoritesScreen(
             .fillMaxSize()
             .padding(paddingValues)) {
             // Your main content
-            FavoriteColumn(favoritesViewModel = favoritesViewModel)
+            FavoriteColumn(favoritesViewModel = favoritesViewModel, navController = navController)
         }
     }
 
 }
 
 @Composable
-fun FavoriteColumn(modifier: Modifier = Modifier,favoritesViewModel: FavoritesViewModel) {
+fun FavoriteColumn(modifier: Modifier = Modifier,favoritesViewModel: FavoritesViewModel,navController: NavHostController) {
     val favoriteWeatherState = favoritesViewModel.productFavoriteList.collectAsState()
 
     LazyColumn (){
@@ -100,6 +104,10 @@ fun FavoriteColumn(modifier: Modifier = Modifier,favoritesViewModel: FavoritesVi
                 favoriteWeatherState.value[index].city,
                 onClick = {
                     favoritesViewModel.deleteFromFavorite(favoriteWeatherState.value[index])
+                },
+                navigate = {
+                    favoritesViewModel.getWeather(favoriteWeatherState.value[index].city)
+                    navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
                 }
             )
         }
@@ -109,10 +117,13 @@ fun FavoriteColumn(modifier: Modifier = Modifier,favoritesViewModel: FavoritesVi
 @Composable
 fun WeatherItem(
     city: String,
-    onClick:()->Unit
+    onClick:()->Unit,
+    navigate:()->Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().height(40.dp)
+        modifier = Modifier.fillMaxWidth().height(40.dp).clickable {
+            navigate()
+        }
     ) {
         Row (
             modifier = Modifier.fillMaxWidth(),
@@ -128,4 +139,23 @@ fun WeatherItem(
             }
         }
     }
+}
+
+@Composable
+fun FavoriteWeatherScreen(modifier: Modifier = Modifier) {
+
+
+    val currentWeatherState = favoritesViewModel.currentWeather.collectAsState()
+    val hourlyWeatherState = favoritesViewModel.hourlyWeather.collectAsState()
+    val dailyWeatherState = favoritesViewModel.dailyWeather.collectAsState()
+
+    RefreshableScreen(
+        currentWeatherState = currentWeatherState,
+        hourlyWeatherState = hourlyWeatherState,
+        dailyWeatherState = dailyWeatherState,
+        onRefresh = {
+
+        },
+    )
+    Log.d("FavoritesViewModTAGel", "getCurrentWeather: ${favoritesViewModel.currentWeather.collectAsState().value}")
 }

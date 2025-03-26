@@ -64,7 +64,7 @@ fun MapScreen(
         LocationRepository(locationManager),
         SettingsRepository(
             DataStoreManager(context.applicationContext),
-            LanguageChangeHelper(context)
+            LanguageChangeHelper
         )
     )
     val mapViewModel: MapViewModel = viewModel(factory = factory)
@@ -126,7 +126,7 @@ fun GoogleMapScreen(
     var markerPosition by remember { mutableStateOf(LatLng(0.0, 0.0)) }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(markerPosition, 10f)
+        position = CameraPosition.fromLatLngZoom(markerPosition, 1f)
     }
 
     GoogleMap(

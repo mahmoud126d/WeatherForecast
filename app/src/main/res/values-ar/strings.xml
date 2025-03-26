@@ -17,5 +17,8 @@
     <string name="c">س°</string>
     <string name="f">ف°</string>
     <string name="k">ك°</string>
-
+    <string name="Home">الرئيسيه</string>
+    <string name="alarm">التنبيهات</string>
+    <string name="favorites">المفضله</string>
+    <string name="settings">الاعدادات</string>
 </resources>

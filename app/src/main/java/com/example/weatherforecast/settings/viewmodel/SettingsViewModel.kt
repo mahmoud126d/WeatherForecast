@@ -1,5 +1,6 @@
 package com.example.weatherforecast.settings.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.LiveData
@@ -30,7 +31,7 @@ class SettingsViewModel(private val settingsRepository: SettingsRepository) : Vi
     fun getDefaultLanguage(){
         settingsRepository.getDefaultLanguage()
     }
-    fun changeLanguage(langCode:String){
-        settingsRepository.changeLanguage(langCode)
+    fun changeLanguage(context: Context, langCode:String){
+        settingsRepository.changeLanguage(context,langCode)
     }
 }

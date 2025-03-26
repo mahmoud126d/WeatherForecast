@@ -15,4 +15,8 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
     override suspend fun getAllWeather(): Flow<List<CurrentWeather>> {
         return dao.getAllWeather()
     }
+
+    override suspend fun getWeather(cityName: String): Flow<CurrentWeather?> {
+        return dao.getWeatherByCity(cityName)
+    }
 }

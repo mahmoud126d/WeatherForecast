@@ -1,6 +1,7 @@
 package com.example.weatherforecast.repository
 
 
+import android.content.Context
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
 
@@ -32,7 +33,7 @@ class SettingsRepository(
     }
 
     fun getDefaultLanguage(): String = languageChangeHelper.getDefaultLanguage()
-    fun changeLanguage(langCode: String) = languageChangeHelper.changeLanguage(langCode)
+    fun changeLanguage(context: Context,langCode: String) = languageChangeHelper.changeLanguage(context,langCode)
     fun formatNumber(number: Int) = languageChangeHelper.formatNumber(number)
 
 }

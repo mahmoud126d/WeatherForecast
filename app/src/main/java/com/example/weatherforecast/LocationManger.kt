@@ -60,14 +60,14 @@ class LocationManager(context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 geocoder.getFromLocation(latitude, longitude, 1) { addresses ->
                     val address = addresses.getOrNull(0)
-                    val city = address?.locality ?: address?.subAdminArea ?: address?.adminArea
+                    val city = address?.subAdminArea
                     _cityNameFlow.value = city ?: "Unknown City"
-                    Log.d("LocationManager", "City Name: $city")
+                    Log.d("LocationManager", "City Name: ${address?.subAdminArea}")
                 }
             } else {
                 val addresses = geocoder.getFromLocation(latitude, longitude, 1)
                 val address = addresses?.getOrNull(0)
-                val city = address?.locality ?: address?.subAdminArea ?: address?.adminArea
+                val city = address?.subAdminArea
                 _cityNameFlow.value = city ?: "Unknown City"
                 Log.d("LocationManager", "City Name: $city")
             }

@@ -40,6 +40,19 @@ class FavoritesViewModel(
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
 
+    // State flows for different weather data
+    private val _currentWeather = MutableStateFlow<Response>(Response.Loading)
+    val currentWeather: StateFlow<Response> = _currentWeather.asStateFlow()
+
+    private val _hourlyWeather = MutableStateFlow<Response>(Response.Loading)
+    val hourlyWeather: StateFlow<Response> = _hourlyWeather.asStateFlow()
+
+    private val _dailyWeather = MutableStateFlow<Response>(Response.Loading)
+    val dailyWeather: StateFlow<Response> = _dailyWeather.asStateFlow()
+
+
+
+
     fun getCurrentWeather( longitude:Double,latitude:Double) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -159,11 +172,23 @@ class FavoritesViewModel(
         }
     }
     fun saveWeather(weather: CurrentWeather) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(weatherRepository.insertWeather(weather)>0){
                 _toastEvent.emit("added to Favorite")
             }else{
                 _toastEvent.emit("failed to add to Favorite")
+            }
+        }
+    }
+    fun getWeather(cityName:String){
+        viewModelScope.launch (Dispatchers.IO){
+            weatherRepository.getWeather(cityName).collect{
+                val currentWeather :CurrentWeather? = it
+                if(currentWeather != null){
+                    _currentWeather.value = Response.Success(currentWeather)
+                    _hourlyWeather.value = Response.Success(currentWeather)
+                    _dailyWeather.value = Response.Success(currentWeather)
+                }
             }
         }
     }

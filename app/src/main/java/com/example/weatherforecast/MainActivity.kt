@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -26,8 +27,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherforecast.alarms.view.AlarmsScreen
 import com.example.weatherforecast.favorites.view.FavoriteMapScreen
+import com.example.weatherforecast.favorites.view.FavoriteWeatherScreen
 import com.example.weatherforecast.favorites.view.FavoritesScreen
 import com.example.weatherforecast.home.view.HomeScreen
+import com.example.weatherforecast.home.view.RefreshableScreen
 import com.example.weatherforecast.map.view.MapScreen
 import com.example.weatherforecast.settings.view.SettingsScreen
 import com.example.weatherforecast.ui.theme.WeatherForecastTheme
@@ -84,6 +87,8 @@ fun MainScreen(navController: NavHostController) {
             composable(Constants.FAVORITE_MAP_SCREEN) { FavoriteMapScreen(
                 navController = navController
             ) }
+            composable(Constants.FAVORITE_WEATHER_SCREEN) { FavoriteWeatherScreen(
+            ) }
         }
     }
 }
@@ -108,8 +113,8 @@ fun BottomNavBar(navController: NavController) {
     ) {
         items.forEach { screen ->
             NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = screen.title) },
-                label = { Text(screen.title) },
+                icon = { Icon(screen.icon, contentDescription =stringResource(screen.title)) },
+                label = { Text(stringResource(screen.title)) },
                 selected = currentRoute == screen.route,
                 onClick = {
                     if (currentRoute != screen.route) {

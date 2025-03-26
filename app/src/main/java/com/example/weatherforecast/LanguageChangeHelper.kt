@@ -9,8 +9,8 @@ import androidx.core.os.LocaleListCompat
 import java.text.NumberFormat
 import java.util.Locale
 
-class LanguageChangeHelper(private val context: Context) {
-    fun changeLanguage(languageCode: String) {
+object LanguageChangeHelper {
+    fun changeLanguage(  context: Context,languageCode: String) {
         //version >= 13
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.getSystemService(LocaleManager::class.java).applicationLocales =

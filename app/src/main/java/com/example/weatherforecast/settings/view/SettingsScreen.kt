@@ -50,7 +50,7 @@ import java.util.Locale
 fun SettingsScreen(modifier: Modifier = Modifier,navController: NavController) {
     val context = LocalContext.current
     // Create the repository using DataStoreManager
-    val repository = SettingsRepository(DataStoreManager(context.applicationContext),LanguageChangeHelper(context))
+    val repository = SettingsRepository(DataStoreManager(context.applicationContext),LanguageChangeHelper)
     // Create a ViewModelFactory that takes the repository as a dependency
     val factory = SettingsViewModelFactory(repository)
 
@@ -145,7 +145,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 "ar",
                 language ?: "en"
             ) {
-                settingsViewModel.changeLanguage("ar")
+                LanguageChangeHelper.changeLanguage(context,"ar")
                 settingsViewModel.saveLanguage("ar")
             }
             RadioButtonRow(
@@ -153,7 +153,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 "en",
                 language ?: "en"
             ) {
-                settingsViewModel.changeLanguage("en")
+                LanguageChangeHelper.changeLanguage(context,"en")
                 settingsViewModel.saveLanguage("en")
             }
         }

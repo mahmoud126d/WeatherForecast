@@ -167,5 +167,4 @@ class HomeViewModel(
 
     fun stopLocationUpdates() = locationRepository.stopLocationUpdates()
 
-    fun formatNumber(number: Int) = settingsRepository.formatNumber(number)
 }

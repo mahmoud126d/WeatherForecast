@@ -7,4 +7,5 @@ interface WeatherLocalDataSource {
     suspend fun insertWeather(weather: CurrentWeather):Long
     suspend fun deleteWeather(weather: CurrentWeather):Int
     suspend fun getAllWeather(): Flow<List<CurrentWeather>>?
+    suspend fun getWeather(cityName: String): Flow<CurrentWeather?>
 }

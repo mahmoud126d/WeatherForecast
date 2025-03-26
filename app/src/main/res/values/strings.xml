@@ -19,4 +19,8 @@
     <string name="c">°C</string>
     <string name="f">°F</string>
     <string name="k">°K</string>
+    <string name="Home">home</string>
+    <string name="alarm">Alarms</string>
+    <string name="favorites">favorites</string>
+    <string name="settings">settings</string>
 </resources>

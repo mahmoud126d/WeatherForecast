@@ -48,6 +48,7 @@ class CurrentWeatherRepositoryImpl private constructor(
     override suspend fun deleteWeather(weather: CurrentWeather) = weatherLocalDataSource.deleteWeather(weather)
 
     override suspend fun getAllWeather(): Flow<List<CurrentWeather>>? = weatherLocalDataSource.getAllWeather()
+    override suspend fun getWeather(cityName: String): Flow<CurrentWeather?> =weatherLocalDataSource.getWeather(cityName)
 
     companion object {
         private var INSTANCE: CurrentWeatherRepositoryImpl? = null

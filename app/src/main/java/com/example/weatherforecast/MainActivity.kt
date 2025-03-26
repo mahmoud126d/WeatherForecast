@@ -3,20 +3,29 @@ package com.example.weatherforecast
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -35,6 +44,7 @@ import com.example.weatherforecast.map.view.MapScreen
 import com.example.weatherforecast.settings.view.SettingsScreen
 import com.example.weatherforecast.ui.theme.WeatherForecastTheme
 import com.example.weatherforecast.utils.Constants
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,8 +77,20 @@ fun MainScreen(navController: NavHostController) {
     }
 
     Scaffold(
-     //   topBar = { TopAppBar(navController) },
-        bottomBar = { BottomNavBar(navController) }
+        topBar = { TopAppBar(navController) },
+        bottomBar = {
+            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            val screensWithBottomBar = listOf(
+                Constants.HOME_SCREEN,
+                Constants.ALARM_SCREEN,
+                Constants.FAVORITES_SCREEN,
+                Constants.SETTINGS_SCREEN
+            )
+
+            if (currentRoute in screensWithBottomBar) {
+                BottomNavBar(navController)
+            }
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -78,17 +100,10 @@ fun MainScreen(navController: NavHostController) {
             composable(Constants.HOME_SCREEN) { HomeScreen() }
             composable(Constants.ALARM_SCREEN) { AlarmsScreen() }
             composable(Constants.FAVORITES_SCREEN) { FavoritesScreen(navController = navController) }
-            composable(Constants.SETTINGS_SCREEN) { SettingsScreen(
-                navController = navController
-            ) }
-            composable(Constants.MAP_SCREEN) { MapScreen(
-                navController = navController
-            ) }
-            composable(Constants.FAVORITE_MAP_SCREEN) { FavoriteMapScreen(
-                navController = navController
-            ) }
-            composable(Constants.FAVORITE_WEATHER_SCREEN) { FavoriteWeatherScreen(
-            ) }
+            composable(Constants.SETTINGS_SCREEN) { SettingsScreen(navController = navController) }
+            composable(Constants.MAP_SCREEN) { MapScreen(navController = navController) }
+            composable(Constants.FAVORITE_MAP_SCREEN) { FavoriteMapScreen(navController = navController) }
+            composable(Constants.FAVORITE_WEATHER_SCREEN) { FavoriteWeatherScreen() }
         }
     }
 }
@@ -96,11 +111,25 @@ fun MainScreen(navController: NavHostController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopAppBar(navController: NavController) {
+    val canNavigateBack = navController.previousBackStackEntry != null
+
     androidx.compose.material3.TopAppBar(
-        title = { Text("Weather Forecast") },
+        title = { Text("Weather Forecast", color = Color.Black) },
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+            }
+        },
 
     )
 }
+
 
 @Composable
 fun BottomNavBar(navController: NavController) {

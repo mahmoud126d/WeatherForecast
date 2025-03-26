@@ -30,6 +30,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +46,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
@@ -100,6 +105,9 @@ fun RefreshableScreen(
             when (val currentWeather = currentWeatherState.value) {
                 is Response.Loading -> {
                     Log.d(TAG, "Loading")
+                    item {
+                        LoadingAnimation()
+                    }
                 }
 
                 is Response.Success -> {
@@ -135,6 +143,9 @@ fun RefreshableScreen(
 
                 Response.Loading -> {
                     Log.d(TAG, "Loading")
+                    item {
+                        LoadingAnimation()
+                    }
                 }
 
                 is Response.Success -> {
@@ -483,5 +494,11 @@ fun HourlyWeatherColumn(
         )
         Text(temperature)
     }
+}
+
+@Composable
+fun LoadingAnimation(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.Url("https://lottie.host/47e59a10-000b-4f22-a3cf-412e18d01770/hff86ngThj.lottie"))
+    LottieAnimation(composition=composition, iterations = LottieConstants.IterateForever)
 }
 

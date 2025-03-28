@@ -8,19 +8,26 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherforecast.AndroidConnectivityObserver
+import com.example.weatherforecast.ConnectivityRepository
+import com.example.weatherforecast.ConnectivityViewModel
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
+import com.example.weatherforecast.favorites.view.favoritesViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModelFactory
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
@@ -28,6 +35,7 @@ import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
+import kotlinx.coroutines.flow.first
 
 private const val TAG = "HomeScreen"
 
@@ -50,10 +58,20 @@ fun HomeScreen() {
         SettingsRepository(
             DataStoreManager(context.applicationContext),
             LanguageChangeHelper
-        )
+        ),
+        ConnectivityRepository(AndroidConnectivityObserver(
+            context = context.applicationContext
+        ))
 
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
+    LaunchedEffect(Unit) {
+        homeViewModel.getConnectivityState()
+        homeViewModel.toastEvent.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+        }
+    }
     LaunchedEffect(Unit) {
         homeViewModel.getCurrentWeather()
         homeViewModel.getHourlyWeather()

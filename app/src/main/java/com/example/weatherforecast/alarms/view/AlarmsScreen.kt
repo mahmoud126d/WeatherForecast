@@ -1,6 +1,8 @@
 package com.example.weatherforecast.alarms.view
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +53,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.NotificationScheduler
 import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModel
@@ -138,7 +142,7 @@ fun BottomSheet(modifier: Modifier = Modifier) {
 
     // Date picker state with start date set to today
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = today+86400000,
+        initialSelectedDateMillis = today + 86400000,
         selectableDates = object : SelectableDates {
             // Override to only allow dates from today onwards
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
@@ -224,10 +228,10 @@ fun BottomSheet(modifier: Modifier = Modifier) {
                         DatePicker(
                             state = datePickerState,
                             title = {
-                                Row (
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.Center
-                                ){
+                                ) {
                                     Text("Select a Date")
                                 }
                             }
@@ -292,6 +296,7 @@ fun BottomSheet(modifier: Modifier = Modifier) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 private fun saveAlert(city: String, long: Double, lat: Double, date: String, time: String) {
     alarmsViewModel.saveAlert(city, long, lat, date, time)
 }
@@ -299,10 +304,9 @@ private fun saveAlert(city: String, long: Double, lat: Double, date: String, tim
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AlertColumn(modifier: Modifier = Modifier,alerts:List<AlertData>) {
+fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
     LazyColumn {
-        items(alerts.size){
-            index->
+        items(alerts.size) { index ->
             val item = alerts[index]
             val dismissState = rememberDismissState(
                 confirmStateChange = { dismissValue ->
@@ -348,17 +352,17 @@ fun AlertColumn(modifier: Modifier = Modifier,alerts:List<AlertData>) {
 }
 
 @Composable
-fun AlertItem(modifier: Modifier = Modifier,city: String,date: String,time: String) {
+fun AlertItem(modifier: Modifier = Modifier, city: String, date: String, time: String) {
     Card(
         modifier.fillMaxWidth()
     ) {
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp, horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(city)
             Column {
                 Text(date)

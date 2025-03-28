@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherforecast.ConnectivityRepository
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
@@ -17,10 +18,13 @@ import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.DateUtils
 import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -28,7 +32,8 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val weatherRepository: CurrentWeatherRepository,
     private val locationRepository: LocationRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val connectivityRepository: ConnectivityRepository
 ) : ViewModel() {
 
     companion object {
@@ -48,12 +53,26 @@ class HomeViewModel(
     private val _dailyWeather = MutableStateFlow<Response>(Response.Loading)
     val dailyWeather: StateFlow<Response> = _dailyWeather.asStateFlow()
 
-    // Message LiveData for potential error or status messages
-    private val _message = MutableLiveData("")
-    val message: LiveData<String> = _message
+
 
     // Location state
     val location: StateFlow<Location?> = locationRepository.locationFlow
+
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent = _toastEvent.asSharedFlow()
+
+    val isOnline = connectivityRepository.isConnectedState
+    fun getConnectivityState(){
+        viewModelScope.launch {
+            connectivityRepository.isConnectedState.collect{
+                if (!it){
+                    _toastEvent.emit("connection lost")
+                }else{
+                    _toastEvent.emit("You Are online")
+                }
+            }
+        }
+    }
 
     fun getCurrentWeather() {
         viewModelScope.launch(Dispatchers.IO) {

@@ -118,7 +118,7 @@ fun RefreshableScreen(
                         WeatherInfoCard(
                             currentWeatherResponse,
                             contentDescription = "",
-                            formattedDateTime = DateUtils.getFormattedDateTime(),
+                            formattedDateTime = currentWeatherResponse.lastUpdate,
                         )
                     }
                     item {
@@ -252,9 +252,15 @@ fun WeatherInfoCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Time Row
-                    Text(
-                        text = formattedDateTime,
-                    )
+                    Column {
+                        Text(
+                            text = "last update",
+                        )
+                        Text(
+                            text = formattedDateTime,
+                            fontSize = 22.sp,
+                        )
+                    }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceEvenly

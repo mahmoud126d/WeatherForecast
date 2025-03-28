@@ -4,9 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 
-@Entity(tableName = "current_weather")
+@Entity(tableName = "home_weather")
 @TypeConverters(WeatherTypeConverters::class)
-data class CurrentWeather(
+data class HomeWeather(
     val temperature: Double=0.0,
     val humidity: Int = 0,
     val description: String = "",
@@ -19,5 +19,5 @@ data class CurrentWeather(
     var address:String = "",
     var listOfHourlyWeather:List<DayWeather> = emptyList(),
     var listOfDayWeather:List<DayWeather> = emptyList(),
-    var lastUpdate:String = ""
+    val lastUpdate:String = ""
 )

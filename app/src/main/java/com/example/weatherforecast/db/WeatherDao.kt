@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.HomeWeather
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -36,4 +37,9 @@ interface WeatherDao {
     @Query("DELETE FROM AlertData WHERE timestamp < :currentTime")
     suspend fun deleteOldAlerts(currentTime: Long):Int
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHomeWeather(weather: HomeWeather):Long
+
+    @Query("SELECT * FROM  home_weather LIMIT 1")
+    fun getHomeWeather(): Flow<HomeWeather?>
 }

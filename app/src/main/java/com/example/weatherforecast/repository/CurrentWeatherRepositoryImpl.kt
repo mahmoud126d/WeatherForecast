@@ -5,6 +5,7 @@ import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.CurrentWeatherResponse
 import com.example.weatherforecast.model.FiveDaysWeatherResponse
+import com.example.weatherforecast.model.HomeWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 
@@ -61,6 +62,14 @@ class CurrentWeatherRepositoryImpl private constructor(
 
     override suspend fun deleteOldAlerts(currentTime: Long): Int {
         return weatherLocalDataSource.deleteOldAlerts(currentTime)
+    }
+
+    override suspend fun insertHomeWeather(weather: HomeWeather): Long {
+        return weatherLocalDataSource.insertHomeWeather(weather)
+    }
+
+    override suspend fun getHomeWeather(): Flow<HomeWeather?> {
+        return weatherLocalDataSource.getHomeWeather()
     }
 
     companion object {

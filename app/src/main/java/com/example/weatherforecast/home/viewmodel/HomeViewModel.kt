@@ -1,15 +1,19 @@
 package com.example.weatherforecast.home.viewmodel
 
 import android.location.Location
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.ConnectivityRepository
+import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
+import com.example.weatherforecast.model.toHomeWeather
 import com.example.weatherforecast.model.toHourlyWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
@@ -28,6 +32,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class HomeViewModel(
     private val weatherRepository: CurrentWeatherRepository,
@@ -54,7 +60,6 @@ class HomeViewModel(
     val dailyWeather: StateFlow<Response> = _dailyWeather.asStateFlow()
 
 
-
     // Location state
     val location: StateFlow<Location?> = locationRepository.locationFlow
 
@@ -62,98 +67,124 @@ class HomeViewModel(
     val toastEvent = _toastEvent.asSharedFlow()
 
     val isOnline = connectivityRepository.isConnectedState
-    fun getConnectivityState(){
+    fun getConnectivityState() {
         viewModelScope.launch {
-            connectivityRepository.isConnectedState.collect{
-                if (!it){
+            connectivityRepository.isConnectedState.collect {
+                if (!it) {
                     _toastEvent.emit("connection lost")
-                }else{
+                } else {
                     _toastEvent.emit("You Are online")
                 }
             }
         }
     }
 
-    fun getCurrentWeather() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val (latitude, longitude) = getLocationCoordinates()
-                val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
-                val language = settingsRepository.languageFlow.first() ?: DEFAULT_LANGUAGE
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getHomeDetails() {
+        if (isOnline.value) {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    val (latitude, longitude) = getLocationCoordinates()
+                    val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+                    val language = settingsRepository.languageFlow.first() ?: DEFAULT_LANGUAGE
 
-                weatherRepository.getCurrentWeather(
-                    latitude,
-                    longitude,
-                    unit,
-                    language,
-                    Constants.API_KEY
-                )
-                    .catch { ex -> _currentWeather.value = Response.Failure(ex) }
-                    .collect { response ->
-                        _currentWeather.value = Response.Success(response.toCurrentWeather())
-                    }
-            } catch (ex: Exception) {
-                _currentWeather.value = Response.Failure(ex)
-            }
-        }
-    }
-
-    fun getHourlyWeather() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val (latitude, longitude) = getLocationCoordinates()
-                val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
-
-                weatherRepository.getFiveDaysWeather(
-                    latitude,
-                    longitude,
-                    unit,
-                    "ar",
-                    Constants.API_KEY
-                )
-                    .catch { ex -> _hourlyWeather.value = Response.Failure(ex) }
-                    .collect { response ->
-                        val weatherData = response.toHourlyWeather().apply {
-                            listOfHourlyWeather = listOfHourlyWeather
-                                .take(MAX_HOURLY_FORECASTS)
-                                .map { it.apply { time = DateUtils.extractTime(time) } }
+                    weatherRepository.getCurrentWeather(
+                        latitude,
+                        longitude,
+                        unit,
+                        language,
+                        Constants.API_KEY
+                    )
+                        .catch { ex -> _currentWeather.value = Response.Failure(ex) }
+                        .collect { response ->
+                            _currentWeather.value = Response.Success(response.toCurrentWeather())
                         }
-                        _hourlyWeather.value = Response.Success(weatherData)
+                } catch (ex: Exception) {
+                    _currentWeather.value = Response.Failure(ex)
+                }
+            }
+
+
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    val (latitude, longitude) = getLocationCoordinates()
+                    val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+
+                    weatherRepository.getFiveDaysWeather(
+                        latitude,
+                        longitude,
+                        unit,
+                        "ar",
+                        Constants.API_KEY
+                    )
+                        .catch { ex -> _hourlyWeather.value = Response.Failure(ex) }
+                        .collect { response ->
+                            val weatherData = response.toHourlyWeather().apply {
+                                listOfHourlyWeather = listOfHourlyWeather
+                                    .take(MAX_HOURLY_FORECASTS)
+                                    .map { it.apply { time = DateUtils.extractTime(time) } }
+                            }
+                            _hourlyWeather.value = Response.Success(weatherData)
+                        }
+                } catch (ex: Exception) {
+                    _hourlyWeather.value = Response.Failure(ex)
+                }
+            }
+
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+
+                    val (latitude, longitude) = getLocationCoordinates()
+                    val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+
+                    weatherRepository.getFiveDaysWeather(
+                        latitude,
+                        longitude,
+                        unit,
+                        "ar",
+                        Constants.API_KEY
+                    )
+                        .catch { ex -> _dailyWeather.value = Response.Failure(ex) }
+                        .collect { response ->
+                            val weatherData = response.toFiveDaysWeather()
+                            val dailyAverages = calculateDailyAverages(weatherData.listOfDayWeather)
+                            weatherData.lastUpdate = getCurrentDateTime()
+                            _dailyWeather.value = Response.Success(
+                                weatherData.copy(
+                                    listOfDayWeather = dailyAverages,
+                                    lastUpdate = getCurrentDateTime()
+                                )
+                            )
+
+                            weatherRepository.insertHomeWeather(
+                                weatherData.copy(
+                                    listOfDayWeather = dailyAverages,
+                                ).toHomeWeather()
+                            )
+
+                        }
+                } catch (ex: Exception) {
+                    _dailyWeather.value = Response.Failure(ex)
+
+                }
+            }
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    weatherRepository.getHomeWeather().collect {
+                        if (it != null) {
+                            _currentWeather.value = Response.Success(it.toCurrentWeather())
+                            _hourlyWeather.value = Response.Success(it.toCurrentWeather())
+                            _dailyWeather.value = Response.Success(it.toCurrentWeather())
+                        }
                     }
-            } catch (ex: Exception) {
-                _hourlyWeather.value = Response.Failure(ex)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
 
-    fun getDailyWeather() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-
-                val (latitude, longitude) = getLocationCoordinates()
-                val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
-
-                weatherRepository.getFiveDaysWeather(
-                    latitude,
-                    longitude,
-                    unit,
-                    "ar",
-                    Constants.API_KEY
-                )
-                    .catch { ex -> _dailyWeather.value = Response.Failure(ex) }
-                    .collect { response ->
-                        val weatherData = response.toFiveDaysWeather()
-                        val dailyAverages = calculateDailyAverages(weatherData.listOfDayWeather)
-
-                        _dailyWeather.value = Response.Success(
-                            weatherData.copy(listOfDayWeather = dailyAverages)
-                        )
-                    }
-            } catch (ex: Exception) {
-                _dailyWeather.value = Response.Failure(ex)
-            }
-        }
-    }
 
     private suspend fun getLocationCoordinates(): Pair<Double, Double> {
         val locationSelection = settingsRepository.locationSelection.first()
@@ -172,18 +203,28 @@ class HomeViewModel(
         return groupedByDay.map { (day, readings) ->
             DayWeather(
                 temp = readings.map { it.temp }.average(),
-                icon = readings.groupingBy { it.icon }.eachCount().maxByOrNull { it.value }?.key ?: "",
+                icon = readings.groupingBy { it.icon }.eachCount().maxByOrNull { it.value }?.key
+                    ?: "",
                 time = day
             )
         }
     }
+
     suspend fun getTemperatureUnit(): String {
         return settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
     }
+
     fun getDateTime() = DateUtils.getFormattedDateTime()
 
     fun startLocationUpdates() = locationRepository.startLocationUpdates()
 
     fun stopLocationUpdates() = locationRepository.stopLocationUpdates()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getCurrentDateTime(): String {
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+        return current.format(formatter)
+    }
 
 }

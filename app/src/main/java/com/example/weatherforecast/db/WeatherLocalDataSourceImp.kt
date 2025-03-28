@@ -2,6 +2,7 @@ package com.example.weatherforecast.db
 
 import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.HomeWeather
 import kotlinx.coroutines.flow.Flow
 
 class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSource {
@@ -35,5 +36,13 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
 
     override suspend fun deleteOldAlerts(currentTime: Long): Int {
         return dao.deleteOldAlerts(currentTime)
+    }
+
+    override suspend fun insertHomeWeather(weather: HomeWeather): Long {
+        return dao.insertHomeWeather(weather)
+    }
+
+    override suspend fun getHomeWeather(): Flow<HomeWeather?> {
+        return dao.getHomeWeather()
     }
 }

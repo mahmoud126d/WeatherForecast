@@ -1,6 +1,10 @@
 package com.example.weatherforecast.model
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.google.gson.annotations.SerializedName
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 data class FiveDaysWeatherResponse(
@@ -42,6 +46,7 @@ data class DayWeather(
     var time:String
 )
 lateinit var currentWeather: CurrentWeather
+@RequiresApi(Build.VERSION_CODES.O)
 fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
     currentWeather = CurrentWeather(
         temperature = main.temp,
@@ -52,7 +57,7 @@ fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
         city = name,
         speed = wind.speed,
         icon = weather.firstOrNull()?.icon ?: "No icon",
-    )
+        )
     return currentWeather
 }
 
@@ -83,4 +88,38 @@ fun FiveDaysWeatherResponse.toHourlyWeather(): CurrentWeather {
     }
     currentWeather.listOfHourlyWeather = list
     return currentWeather
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun CurrentWeather.toHomeWeather(): HomeWeather {
+    return  HomeWeather(
+        temperature = temperature,
+        humidity = humidity,
+        description = description,
+        cloud = cloud,
+        pressure = pressure,
+        city = city,
+        speed = speed,
+        icon = icon,
+        lastUpdate = lastUpdate,
+        listOfDayWeather = listOfDayWeather,
+        listOfHourlyWeather = listOfHourlyWeather
+    )
+}
+@RequiresApi(Build.VERSION_CODES.O)
+fun HomeWeather.toCurrentWeather(): CurrentWeather {
+    return  CurrentWeather(
+        temperature = temperature,
+        humidity = humidity,
+        description = description,
+        cloud = cloud,
+        pressure = pressure,
+        city = city,
+        speed = speed,
+        icon = icon,
+        lastUpdate = lastUpdate,
+        listOfDayWeather = listOfDayWeather,
+        listOfHourlyWeather = listOfHourlyWeather
+    )
 }

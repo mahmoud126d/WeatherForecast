@@ -4,6 +4,7 @@ import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.CurrentWeatherResponse
 import com.example.weatherforecast.model.FiveDaysWeatherResponse
+import com.example.weatherforecast.model.HomeWeather
 import kotlinx.coroutines.flow.Flow
 
 interface CurrentWeatherRepository {
@@ -29,5 +30,6 @@ interface CurrentWeatherRepository {
     suspend fun getAllAlerts(): Flow<List<AlertData>>?
     suspend fun deleteAlert(alertData: AlertData):Int
     suspend fun deleteOldAlerts(currentTime: Long):Int
-
+    suspend fun insertHomeWeather(weather: HomeWeather):Long
+    suspend fun getHomeWeather():Flow<HomeWeather?>
 }

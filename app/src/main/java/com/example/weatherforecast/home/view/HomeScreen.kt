@@ -7,9 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,12 +38,15 @@ import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private const val TAG = "HomeScreen"
 
 private const val MY_LOCATION_PERMISSION_ID = 5005
 lateinit var tempUnitSymbol: String
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
@@ -73,9 +78,10 @@ fun HomeScreen() {
         }
     }
     LaunchedEffect(Unit) {
-        homeViewModel.getCurrentWeather()
-        homeViewModel.getHourlyWeather()
-        homeViewModel.getDailyWeather()
+//        homeViewModel.getCurrentWeather()
+//        homeViewModel.getHourlyWeather()
+//        homeViewModel.getDailyWeather()
+        homeViewModel.getHomeDetails()
     }
     LaunchedEffect(Unit) {
         if (checkPermissions(context)) {
@@ -107,9 +113,10 @@ fun HomeScreen() {
         hourlyWeatherState = homeViewModel.hourlyWeather.collectAsState(),
         dailyWeatherState = homeViewModel.dailyWeather.collectAsState(),
         onRefresh = {
-            homeViewModel.getCurrentWeather()
-            homeViewModel.getHourlyWeather()
-            homeViewModel.getDailyWeather()
+//            homeViewModel.getCurrentWeather()
+//            homeViewModel.getHourlyWeather()
+//            homeViewModel.getDailyWeather()
+            homeViewModel.getHomeDetails()
         },
     )
 }

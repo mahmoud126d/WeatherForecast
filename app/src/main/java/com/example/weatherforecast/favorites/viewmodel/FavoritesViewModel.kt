@@ -1,7 +1,9 @@
 package com.example.weatherforecast.favorites.viewmodel
 
 import android.location.Address
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -60,7 +62,8 @@ class FavoritesViewModel(
         locationRepo.getAddress(lat, long)
     }
 
-    fun getCurrentWeather( longitude:Double,latitude:Double) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getCurrentWeather(longitude:Double, latitude:Double) {
         askForAddress(longitude,latitude)
         viewModelScope.launch(Dispatchers.IO) {
             try {

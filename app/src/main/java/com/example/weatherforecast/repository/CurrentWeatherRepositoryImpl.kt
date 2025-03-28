@@ -1,6 +1,7 @@
 package com.example.weatherforecast.repository
 
 import com.example.weatherforecast.db.WeatherLocalDataSource
+import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.CurrentWeatherResponse
 import com.example.weatherforecast.model.FiveDaysWeatherResponse
@@ -49,6 +50,18 @@ class CurrentWeatherRepositoryImpl private constructor(
 
     override suspend fun getAllWeather(): Flow<List<CurrentWeather>>? = weatherLocalDataSource.getAllWeather()
     override suspend fun getWeather(cityName: String): Flow<CurrentWeather?> =weatherLocalDataSource.getWeather(cityName)
+    override suspend fun insertAlert(alertData: AlertData) = weatherLocalDataSource.insertAlert(alertData)
+    override suspend fun getAllAlerts(): Flow<List<AlertData>>? {
+        return weatherLocalDataSource.getAllAlerts()
+    }
+
+    override suspend fun deleteAlert(alertData: AlertData): Int {
+        return weatherLocalDataSource.deleteAlert(alertData)
+    }
+
+    override suspend fun deleteOldAlerts(currentTime: Long): Int {
+        return weatherLocalDataSource.deleteOldAlerts(currentTime)
+    }
 
     companion object {
         private var INSTANCE: CurrentWeatherRepositoryImpl? = null

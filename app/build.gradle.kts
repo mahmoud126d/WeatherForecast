@@ -98,4 +98,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
     //lottie
     implementation("com.airbnb.android:lottie-compose:6.3.0")
+    //material
+    implementation ("androidx.compose.material:material:1.6.0")
+    //work manger
+    implementation ("androidx.work:work-runtime-ktx:2.7.1")
 }

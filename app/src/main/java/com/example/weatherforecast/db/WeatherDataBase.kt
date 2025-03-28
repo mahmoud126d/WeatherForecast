@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 
-@Database(entities = arrayOf(CurrentWeather::class), version = 1)
+@Database(entities = arrayOf(CurrentWeather::class, AlertData::class), version = 3)
 abstract class WeatherDataBase :RoomDatabase(){
     abstract fun getWeatherDao() : WeatherDao
     companion object{
@@ -16,7 +17,7 @@ abstract class WeatherDataBase :RoomDatabase(){
             return INSTANCE ?: synchronized(this){
                 val instance = Room.databaseBuilder(
                     context.applicationContext, WeatherDataBase::class.java, "weather_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

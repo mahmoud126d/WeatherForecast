@@ -61,6 +61,7 @@ import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
+import com.example.weatherforecast.utils.DateUtils
 import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.delay
 
@@ -117,7 +118,7 @@ fun RefreshableScreen(
                         WeatherInfoCard(
                             currentWeatherResponse,
                             contentDescription = "",
-                            formattedDateTime = "homeViewModel.getDateTime()",
+                            formattedDateTime = DateUtils.getFormattedDateTime(),
                         )
                     }
                     item {

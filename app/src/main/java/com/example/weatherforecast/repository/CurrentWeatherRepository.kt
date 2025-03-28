@@ -1,5 +1,6 @@
 package com.example.weatherforecast.repository
 
+import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.CurrentWeatherResponse
 import com.example.weatherforecast.model.FiveDaysWeatherResponse
@@ -24,4 +25,9 @@ interface CurrentWeatherRepository {
     suspend fun deleteWeather(weather: CurrentWeather):Int
     suspend fun getAllWeather(): Flow<List<CurrentWeather>>?
     suspend fun getWeather(cityName: String): Flow<CurrentWeather?>
+    suspend fun insertAlert(alertData: AlertData):Long
+    suspend fun getAllAlerts(): Flow<List<AlertData>>?
+    suspend fun deleteAlert(alertData: AlertData):Int
+    suspend fun deleteOldAlerts(currentTime: Long):Int
+
 }

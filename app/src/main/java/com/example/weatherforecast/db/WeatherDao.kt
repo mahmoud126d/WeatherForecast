@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 import kotlinx.coroutines.flow.Flow
 
@@ -22,4 +23,17 @@ interface WeatherDao {
 
     @Query("SELECT * FROM current_weather WHERE city = :cityName LIMIT 1")
     fun getWeatherByCity(cityName: String): Flow<CurrentWeather?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAlert(alertData: AlertData):Long
+
+    @Query("SELECT * FROM AlertData")
+    fun getAllAlerts():Flow<List<AlertData>>
+
+    @Delete
+    suspend fun deleteAlert(alertData: AlertData):Int
+
+    @Query("DELETE FROM AlertData WHERE timestamp < :currentTime")
+    suspend fun deleteOldAlerts(currentTime: Long):Int
+
 }

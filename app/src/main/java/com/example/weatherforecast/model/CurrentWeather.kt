@@ -16,6 +16,7 @@ data class CurrentWeather(
     val cloud:Int= 0,
     val date:String= "Default Date",
     val icon:String= "Default Date",
+    var address:String = "",
     var listOfHourlyWeather:List<DayWeather> = emptyList(),
     var listOfDayWeather:List<DayWeather> = emptyList()
 )

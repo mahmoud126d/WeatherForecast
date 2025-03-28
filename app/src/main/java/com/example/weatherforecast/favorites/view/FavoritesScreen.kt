@@ -8,18 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,14 +36,34 @@ import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModel
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModelFactory
 import com.example.weatherforecast.home.view.RefreshableScreen
-import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.utils.Constants
-import kotlinx.coroutines.flow.collect
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.SwipeToDismiss
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.rememberDismissState
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.DismissDirection
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
+import com.example.weatherforecast.LocationManager
+import com.example.weatherforecast.repository.LocationRepository
+import kotlinx.coroutines.launch
 
-lateinit var  favoritesViewModel: FavoritesViewModel
+lateinit var favoritesViewModel: FavoritesViewModel
+
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
@@ -58,19 +76,25 @@ fun FavoritesScreen(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
             WeatherLocalDataSourceImp(
                 WeatherDataBase.getInstance(context).getWeatherDao()
-            )
-        )
+            ),
+
+        ),
+       LocationRepository(LocationManager(context)),
     )
-     favoritesViewModel = viewModel(factory = factory)
+    favoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
         favoritesViewModel.getAllFavorites()
-        favoritesViewModel.toastEvent.collect{
-            message->
-            Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
+        favoritesViewModel.toastEvent.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
         }
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -83,31 +107,93 @@ fun FavoritesScreen(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)) {
-            // Your main content
-            FavoriteColumn(favoritesViewModel = favoritesViewModel, navController = navController)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            FavoriteColumn(
+                favoritesViewModel = favoritesViewModel,
+                navController = navController
+            )
+            LaunchedEffect(Unit) {
+                favoritesViewModel.getAllFavorites()
+                favoritesViewModel.toastEvent.collect { message ->
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = message,
+                            duration = SnackbarDuration.Short,
+                            actionLabel = "Undo"
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> {
+
+                            }
+
+                            SnackbarResult.Dismissed -> {
+
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
-
 }
 
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun FavoriteColumn(modifier: Modifier = Modifier,favoritesViewModel: FavoritesViewModel,navController: NavHostController) {
+fun FavoriteColumn(
+    modifier: Modifier = Modifier,
+    favoritesViewModel: FavoritesViewModel,
+    navController: NavHostController
+) {
     val favoriteWeatherState = favoritesViewModel.productFavoriteList.collectAsState()
 
-    LazyColumn (){
-        items(favoriteWeatherState.value.size){
-            index->
-            WeatherItem(
-                favoriteWeatherState.value[index].city,
-                onClick = {
-                    favoritesViewModel.deleteFromFavorite(favoriteWeatherState.value[index])
+    LazyColumn(modifier = modifier) {
+        items(favoriteWeatherState.value.size) { index ->
+            val item = favoriteWeatherState.value[index]
+            val dismissState = rememberDismissState(
+                confirmStateChange = { dismissValue ->
+                    if (dismissValue == DismissValue.DismissedToStart) {
+                        favoritesViewModel.deleteFromFavorite(item)
+                        true
+                    } else {
+                        false
+                    }
+                }
+            )
+
+            SwipeToDismiss(
+                state = dismissState,
+                directions = setOf(DismissDirection.EndToStart),
+                background = {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .background(Color.White)
+//                            .padding(16.dp),
+//                        contentAlignment = Alignment.CenterEnd
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Delete,
+//                            contentDescription = "Delete",
+//                            tint = Color.White,
+//                            modifier = Modifier.size(40.dp)
+//                        )
+//                    }
                 },
-                navigate = {
-                    favoritesViewModel.getWeather(favoriteWeatherState.value[index].city)
-                    navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
+                dismissContent = {
+                    WeatherItem(
+                        country = "Egypt",
+                        fullAddress = item.city,
+                        navigate = {
+                            favoritesViewModel.getWeather(item.city)
+                            navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
+                        }
+                    )
                 }
             )
         }
@@ -116,29 +202,45 @@ fun FavoriteColumn(modifier: Modifier = Modifier,favoritesViewModel: FavoritesVi
 
 @Composable
 fun WeatherItem(
-    city: String,
-    onClick:()->Unit,
-    navigate:()->Unit
+    country: String,
+    fullAddress: String,
+    navigate: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().height(40.dp).clickable {
-            navigate()
-        }
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { navigate() }
+            .clip(RoundedCornerShape(20.dp))
     ) {
-        Row (
-            modifier = Modifier.fillMaxWidth(),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Text(city)
-            Button({
-                onClick()
-
-            }) {
-                Text("Delete")
-            }
+        ) {
+            Text(
+                text = country,
+                fontSize = 40.sp
+            )
+            Text(
+                text = fullAddress,
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = ""
+            )
         }
     }
+}
+
+@Preview(showSystemUi = true, device = Devices.PIXEL_4)
+@Composable
+fun ItemPreview(modifier: Modifier = Modifier) {
+    WeatherItem(
+        "Egypt",
+        "Suez"
+    ) {}
 }
 
 @Composable
@@ -157,5 +259,8 @@ fun FavoriteWeatherScreen(modifier: Modifier = Modifier) {
 
         },
     )
-    Log.d("FavoritesViewModTAGel", "getCurrentWeather: ${favoritesViewModel.currentWeather.collectAsState().value}")
+    Log.d(
+        "FavoritesViewModTAGel",
+        "getCurrentWeather: ${favoritesViewModel.currentWeather.collectAsState().value}"
+    )
 }

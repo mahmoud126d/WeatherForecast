@@ -1,5 +1,6 @@
 package com.example.weatherforecast.favorites.viewmodel
 
+import android.location.Address
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
 import com.example.weatherforecast.model.toHourlyWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
+import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.DateUtils
 import com.example.weatherforecast.utils.Response
@@ -25,7 +27,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
-    private val weatherRepository: CurrentWeatherRepository
+    private val weatherRepository: CurrentWeatherRepository,
+    private var locationRepo: LocationRepository,
 ) : ViewModel() {
 
     companion object {
@@ -51,9 +54,14 @@ class FavoritesViewModel(
     val dailyWeather: StateFlow<Response> = _dailyWeather.asStateFlow()
 
 
+    val cityName: StateFlow<String?> = locationRepo.cityNameFlow
 
+    private fun askForAddress(lat: Double, long: Double) {
+        locationRepo.getAddress(lat, long)
+    }
 
     fun getCurrentWeather( longitude:Double,latitude:Double) {
+        askForAddress(longitude,latitude)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 weatherRepository.getCurrentWeather(
@@ -127,6 +135,7 @@ class FavoritesViewModel(
                         Log.d(TAG, "getDailyWeather:${weatherData.copy(listOfDayWeather = dailyAverages)} ")
                         //weatherRepository.insertWeather(weatherData.copy(listOfDayWeather = dailyAverages))
                         saveWeather(weatherData.copy(listOfDayWeather = dailyAverages))
+
                     }
             } catch (ex: Exception) {
                 //_dailyWeather.value = Response.Failure(ex)
@@ -173,7 +182,9 @@ class FavoritesViewModel(
     }
     fun saveWeather(weather: CurrentWeather) {
         viewModelScope.launch(Dispatchers.IO) {
-            if(weatherRepository.insertWeather(weather)>0){
+            val cityName = locationRepo.cityNameFlow.first() ?: "No City Name"
+            weather.address = cityName
+                if(weatherRepository.insertWeather(weather)>0){
                 _toastEvent.emit("added to Favorite")
             }else{
                 _toastEvent.emit("failed to add to Favorite")

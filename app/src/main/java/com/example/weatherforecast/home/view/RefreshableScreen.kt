@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -159,7 +160,7 @@ fun RefreshableScreen(
 
 }
 
-@Preview(showSystemUi = true, device = Devices.PIXEL_4)
+//@Preview(showSystemUi = true, device = Devices.PIXEL_4)
 @Composable
 fun WeatherInfoCardPreview(modifier: Modifier = Modifier) {
     WeatherInfoCard(
@@ -209,7 +210,9 @@ fun WeatherInfoCard(
             text = "${LanguageChangeHelper.formatNumber(currentWeather.temperature.toInt())}${tempUnitSymbol}",
             fontSize = 80.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxSize().wrapContentSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize()
         )
             Column(
                 modifier = Modifier
@@ -489,25 +492,37 @@ fun WeatherPeriodBox(
         }
     }
 }
-
+@Preview(showSystemUi = true, device = Devices.PIXEL_4)
+@Composable
+fun HourlyWeatherColumnPreview(modifier: Modifier = Modifier) {
+    HourlyWeatherColumn(
+        "12Am",
+        painterResource(R.drawable.cloudandsun),
+        "23C"
+    )
+}
 @Composable
 fun HourlyWeatherColumn(
     time: String,
     icon: Painter,
     temperature: String
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(time)
-        Image(
-            icon,
-            contentDescription = "",
-            modifier = Modifier.size(40.dp)
-        )
-        Text(temperature)
+    Box (
+        modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 20.dp, topEnd = 20.dp, topStart = 20.dp))
+    ){
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.background(color = colorResource(R.color.purple_alpha_70)).padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(time)
+            Image(
+                icon,
+                contentDescription = "",
+                modifier = Modifier.size(40.dp)
+            )
+            Text(temperature)
+        }
     }
 }
 

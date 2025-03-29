@@ -8,8 +8,8 @@
     <string name="day_forecast">Day forecast</string>
     <string name="language">Language</string>
     <string name="temp_unit">Temp Unit</string>
-    <string name="ar">ar</string>
-    <string name="en">en</string>
+    <string name="ar">Arabic</string>
+    <string name="en">English</string>
     <string name="standard">standard</string>
     <string name="metric">metric</string>
     <string name="imperial">imperial</string>

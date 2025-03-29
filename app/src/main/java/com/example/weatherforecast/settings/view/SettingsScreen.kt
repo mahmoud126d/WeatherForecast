@@ -1,6 +1,7 @@
 package com.example.weatherforecast.settings.view
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
@@ -84,7 +87,7 @@ fun LanguageBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewMo
         Modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Gray)
+            .background(color =  colorResource(R.color.purple_alpha_30))
     ) {
         LanguageSelector(settingsViewModel)
     }
@@ -96,7 +99,7 @@ fun TemperatureBox(modifier: Modifier = Modifier, settingsViewModel: SettingsVie
         Modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Gray)
+            .background(color =  colorResource(R.color.purple_alpha_30))
     ) {
         TemperatureUnitSelector(settingsViewModel)
     }
@@ -107,7 +110,7 @@ fun LocationBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewMo
         Modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Gray)
+            .background(color =  colorResource(R.color.purple_alpha_30))
     ) {
         LocationSelector(settingsViewModel,navController)
     }
@@ -116,22 +119,29 @@ fun LocationBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewMo
 fun LanguageSelector(settingsViewModel: SettingsViewModel) {
     val language by settingsViewModel.language.observeAsState()
     val context = LocalContext.current
-    Column(modifier = Modifier.padding(4.dp)) {
+    Column(modifier = Modifier.padding(8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = "Language Icon",
-                tint = Color.Red,
-                modifier = Modifier.size(32.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(25.dp),
+                    contentDescription = "",
+                    painter = painterResource(R.drawable.translate)
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.language),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
             )
         }
 
@@ -162,24 +172,31 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
 
 @Composable
 fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
-    val tempUnit by settingsViewModel.tempUnit.observeAsState("celsius")
+    val tempUnit by settingsViewModel.tempUnit.observeAsState("metric")
 
-    Column(modifier = Modifier.padding(4.dp)) {
+    Column(modifier = Modifier.padding(8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = "Temperature Icon",
-                tint = Color.Red,
-                modifier = Modifier.size(32.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(25.dp),
+                    contentDescription = "",
+                    painter = painterResource(R.drawable.map)
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.temp_unit),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
             )
         }
 
@@ -217,12 +234,12 @@ fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
 fun LocationSelector(settingsViewModel: SettingsViewModel,navController:NavController) {
     val locationSelection by settingsViewModel.locationSelection.observeAsState()
     val context = LocalContext.current
-    Column(modifier = Modifier.padding(4.dp)) {
+    Column(modifier = Modifier.padding(8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.CheckCircle,
+                painter = painterResource(R.drawable.map),
                 contentDescription = "Language Icon",
                 tint = Color.Red,
                 modifier = Modifier.size(32.dp)
@@ -232,7 +249,6 @@ fun LocationSelector(settingsViewModel: SettingsViewModel,navController:NavContr
                 text = stringResource(R.string.location_select),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
             )
         }
 
@@ -277,14 +293,13 @@ fun RadioButtonRow(
             selected = value == selected,
             onClick = { onSelect(value) },
             colors = RadioButtonDefaults.colors(
-                selectedColor = Color.Cyan,
+                selectedColor = Color.Black,
                 unselectedColor = Color.White
             )
         )
         Text(
             text = label,
             fontSize = 16.sp,
-            color = Color.White
         )
     }
 }

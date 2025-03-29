@@ -97,76 +97,81 @@ class HomeViewModel(
                     )
                         .catch { ex -> _currentWeather.value = Response.Failure(ex) }
                         .collect { response ->
-                            _currentWeather.value = Response.Success(response.toCurrentWeather().apply {
-                                lastUpdate = getCurrentDateTime()
-                            })
+                            _currentWeather.value =
+                                Response.Success(response.toCurrentWeather().apply {
+                                    lastUpdate = getCurrentDateTime()
+                                })
                         }
                 } catch (ex: Exception) {
                     _currentWeather.value = Response.Failure(ex)
                 }
-            }
 
 
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    val (latitude, longitude) = getLocationCoordinates()
-                    val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
 
-                    weatherRepository.getFiveDaysWeather(
-                        latitude,
-                        longitude,
-                        unit,
-                        "ar",
-                        Constants.API_KEY
-                    )
-                        .catch { ex -> _hourlyWeather.value = Response.Failure(ex) }
-                        .collect { response ->
-                            val weatherData = response.toHourlyWeather().apply {
-                                listOfHourlyWeather = listOfHourlyWeather
-                                    .take(MAX_HOURLY_FORECASTS)
-                                    .map { it.apply { time = DateUtils.extractTime(time) } }
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        val (latitude, longitude) = getLocationCoordinates()
+                        val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+
+                        weatherRepository.getFiveDaysWeather(
+                            latitude,
+                            longitude,
+                            unit,
+                            "ar",
+                            Constants.API_KEY
+                        )
+                            .catch { ex -> _hourlyWeather.value = Response.Failure(ex) }
+                            .collect { response ->
+                                val weatherData = response.toHourlyWeather().apply {
+                                    listOfHourlyWeather = listOfHourlyWeather
+                                        .take(MAX_HOURLY_FORECASTS)
+                                        .map { it.apply { time = DateUtils.extractTime(time) } }
+                                }
+                                _hourlyWeather.value = Response.Success(weatherData)
                             }
-                            _hourlyWeather.value = Response.Success(weatherData)
-                        }
-                } catch (ex: Exception) {
-                    _hourlyWeather.value = Response.Failure(ex)
-                }
-            }
+                    } catch (ex: Exception) {
+                        _hourlyWeather.value = Response.Failure(ex)
+                    }
 
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
 
-                    val (latitude, longitude) = getLocationCoordinates()
-                    val unit = settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+                    viewModelScope.launch(Dispatchers.IO) {
+                        try {
 
-                    weatherRepository.getFiveDaysWeather(
-                        latitude,
-                        longitude,
-                        unit,
-                        "ar",
-                        Constants.API_KEY
-                    )
-                        .catch { ex -> _dailyWeather.value = Response.Failure(ex) }
-                        .collect { response ->
-                            val weatherData = response.toFiveDaysWeather()
-                            val dailyAverages = calculateDailyAverages(weatherData.listOfDayWeather)
-                            weatherData.lastUpdate = getCurrentDateTime()
-                            _dailyWeather.value = Response.Success(
-                                weatherData.copy(
-                                    listOfDayWeather = dailyAverages,
-                                )
+                            val (latitude, longitude) = getLocationCoordinates()
+                            val unit =
+                                settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+
+                            weatherRepository.getFiveDaysWeather(
+                                latitude,
+                                longitude,
+                                unit,
+                                "ar",
+                                Constants.API_KEY
                             )
+                                .catch { ex -> _dailyWeather.value = Response.Failure(ex) }
+                                .collect { response ->
+                                    val weatherData = response.toFiveDaysWeather()
+                                    val dailyAverages =
+                                        calculateDailyAverages(weatherData.listOfDayWeather)
+                                    weatherData.lastUpdate = getCurrentDateTime()
+                                    _dailyWeather.value = Response.Success(
+                                        weatherData.copy(
+                                            listOfDayWeather = dailyAverages,
+                                        )
+                                    )
 
-                            weatherRepository.insertHomeWeather(
-                                weatherData.copy(
-                                    listOfDayWeather = dailyAverages,
-                                ).toHomeWeather()
-                            )
+                                    weatherRepository.insertHomeWeather(
+                                        weatherData.copy(
+                                            listOfDayWeather = dailyAverages,
+                                        ).toHomeWeather()
+                                    )
+
+                                }
+                        } catch (ex: Exception) {
+                            _dailyWeather.value = Response.Failure(ex)
 
                         }
-                } catch (ex: Exception) {
-                    _dailyWeather.value = Response.Failure(ex)
-
+                    }
                 }
             }
         } else {

@@ -45,7 +45,7 @@ private const val TAG = "HomeScreen"
 
 private const val MY_LOCATION_PERMISSION_ID = 5005
 lateinit var tempUnitSymbol: String
-
+lateinit var speedUnitSymbol:String
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen() {
@@ -78,9 +78,6 @@ fun HomeScreen() {
         }
     }
     LaunchedEffect(Unit) {
-//        homeViewModel.getCurrentWeather()
-//        homeViewModel.getHourlyWeather()
-//        homeViewModel.getDailyWeather()
         homeViewModel.getHomeDetails()
     }
     LaunchedEffect(Unit) {
@@ -101,10 +98,20 @@ fun HomeScreen() {
             )
         }
         val unit = homeViewModel.getTemperatureUnit()
-        tempUnitSymbol = when (unit) {
-            "metric" -> context.getString(R.string.c)
-            "imperial" -> context.getString(R.string.f)
-            else -> context.getString(R.string.k)
+         when (unit) {
+            "metric" -> {
+                tempUnitSymbol = context.getString(R.string.c)
+                speedUnitSymbol =context.getString(R.string.m_s)
+            }
+            "imperial" -> {
+                tempUnitSymbol = context.getString(R.string.f)
+                speedUnitSymbol = context.getString(R.string.mph)
+            }
+            else ->
+            {
+                tempUnitSymbol = context.getString(R.string.k)
+                speedUnitSymbol =""
+            }
         }
     }
 
@@ -113,9 +120,6 @@ fun HomeScreen() {
         hourlyWeatherState = homeViewModel.hourlyWeather.collectAsState(),
         dailyWeatherState = homeViewModel.dailyWeather.collectAsState(),
         onRefresh = {
-//            homeViewModel.getCurrentWeather()
-//            homeViewModel.getHourlyWeather()
-//            homeViewModel.getDailyWeather()
             homeViewModel.getHomeDetails()
         },
     )

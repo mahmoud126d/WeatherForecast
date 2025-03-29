@@ -97,7 +97,9 @@ class HomeViewModel(
                     )
                         .catch { ex -> _currentWeather.value = Response.Failure(ex) }
                         .collect { response ->
-                            _currentWeather.value = Response.Success(response.toCurrentWeather())
+                            _currentWeather.value = Response.Success(response.toCurrentWeather().apply {
+                                lastUpdate = getCurrentDateTime()
+                            })
                         }
                 } catch (ex: Exception) {
                     _currentWeather.value = Response.Failure(ex)
@@ -152,7 +154,6 @@ class HomeViewModel(
                             _dailyWeather.value = Response.Success(
                                 weatherData.copy(
                                     listOfDayWeather = dailyAverages,
-                                    lastUpdate = getCurrentDateTime()
                                 )
                             )
 

@@ -1,13 +1,19 @@
 package com.example.weatherforecast
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,7 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -60,6 +69,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(navController: NavHostController) {
     val context = LocalContext.current
@@ -77,9 +87,31 @@ fun MainScreen(navController: NavHostController) {
     }
 
     Scaffold(
-        topBar = { TopAppBar(navController) },
+        containerColor = colorResource(id = R.color.background_color),
+        topBar = {
+            val currentRoute =
+                navController.currentBackStackEntryAsState().value?.destination?.route
+            val title = when (currentRoute) {
+                Constants.HOME_SCREEN -> "Home"
+                Constants.ALARM_SCREEN -> "Alarms"
+                Constants.FAVORITES_SCREEN -> "Favorites"
+                Constants.SETTINGS_SCREEN -> "Settings"
+                Constants.MAP_SCREEN -> "Map"
+                Constants.FAVORITE_MAP_SCREEN -> "Favorite Map"
+                Constants.FAVORITE_WEATHER_SCREEN -> "Favorite Weather"
+                else -> stringResource(id = R.string.app_name)
+            }
+
+            if (currentRoute != Constants.HOME_SCREEN) {
+                TopAppBar(
+                    navController,
+                    title = title
+                )
+            }
+        },
         bottomBar = {
-            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            val currentRoute =
+                navController.currentBackStackEntryAsState().value?.destination?.route
             val screensWithBottomBar = listOf(
                 Constants.HOME_SCREEN,
                 Constants.ALARM_SCREEN,
@@ -110,24 +142,24 @@ fun MainScreen(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(navController: NavController) {
+fun TopAppBar(navController: NavController, title: String) {
     val canNavigateBack = navController.previousBackStackEntry != null
 
     androidx.compose.material3.TopAppBar(
-        title = { Text("Weather Forecast", color = Color.Black) },
+        title = { Text(title) },
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White
+                        tint = Color.Black
                     )
                 }
             }
         },
 
-    )
+        )
 }
 
 
@@ -142,7 +174,7 @@ fun BottomNavBar(navController: NavController) {
     ) {
         items.forEach { screen ->
             NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription =stringResource(screen.title)) },
+                icon = { Icon(screen.icon, contentDescription = stringResource(screen.title)) },
                 label = { Text(stringResource(screen.title)) },
                 selected = currentRoute == screen.route,
                 onClick = {

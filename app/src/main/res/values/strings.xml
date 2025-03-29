@@ -23,4 +23,6 @@
     <string name="alarm">Alarms</string>
     <string name="favorites">favorites</string>
     <string name="settings">settings</string>
+    <string name="m_s">m/s</string>
+    <string name="mph">mil/h</string>
 </resources>

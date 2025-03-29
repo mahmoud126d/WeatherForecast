@@ -21,4 +21,6 @@
     <string name="alarm">التنبيهات</string>
     <string name="favorites">المفضله</string>
     <string name="settings">الاعدادات</string>
+    <string name="m_s">م/ث</string>
+    <string name="mph">ميل/ساعه</string>
 </resources>

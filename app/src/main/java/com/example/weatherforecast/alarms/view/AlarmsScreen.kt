@@ -3,6 +3,7 @@ package com.example.weatherforecast.alarms.view
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,14 +13,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.AlertDialog
@@ -28,8 +33,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,28 +54,26 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.work.Configuration
-import androidx.work.WorkManager
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.NotificationScheduler
+import com.example.weatherforecast.R
 import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModel
 import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModelFactory
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
-import com.example.weatherforecast.favorites.view.WeatherItem
 import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
-import com.example.weatherforecast.utils.Constants
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -75,6 +81,7 @@ import java.util.Locale
 
 private lateinit var alarmsViewModel: AlarmsViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AlarmsScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -90,33 +97,65 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
     alarmsViewModel = viewModel(factory = factory)
 
     val alertList = alarmsViewModel.alertList.collectAsState()
+    var isBottomSheetVisible by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .wrapContentSize()
+    Scaffold(
+        containerColor = colorResource(id = R.color.background_color),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    // Fixed: Added onClick handler to show bottom sheet
+                    isBottomSheetVisible = true
+                },
+                containerColor = colorResource(R.color.purple_500),
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.Notifications, contentDescription = "Add Alert", tint = Color.White)
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End,
     ) {
-        AlertColumn(
-            alerts = alertList.value
-        )
-        BottomSheet()
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(top = 16.dp)
+        ) {
+            if (alertList.value.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No alerts set. Tap + to add a weather alert.")
+                }
+            } else {
+                AlertColumn(
+                    alerts = alertList.value
+                )
+            }
+            BottomSheet(
+                isVisible = isBottomSheetVisible,
+                onDismiss = { isBottomSheetVisible = false }
+            )
+        }
     }
 }
-
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheet(modifier: Modifier = Modifier) {
+fun BottomSheet(
+    modifier: Modifier = Modifier,
+    isVisible: Boolean = false,
+    onDismiss: () -> Unit = {}
+) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var isBottomSheetVisible by remember { mutableStateOf(false) }
+
     // State to control the visibility of the date picker dialog
     var showDatePicker by remember { mutableStateOf(false) }
 
     // State to store the selected date
     var selectedDate by remember { mutableStateOf("") }
-
 
     // States for date and time pickers
     var showTimePicker by remember { mutableStateOf(false) }
@@ -130,6 +169,7 @@ fun BottomSheet(modifier: Modifier = Modifier) {
         initialMinute = 0,
         is24Hour = false
     )
+
     // Get today's date in milliseconds
     val today = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
@@ -151,147 +191,167 @@ fun BottomSheet(modifier: Modifier = Modifier) {
         }
     )
 
-    if (isBottomSheetVisible) {
+    if (isVisible) {
         ModalBottomSheet(
-            onDismissRequest = {
-                isBottomSheetVisible = false
-            },
+            onDismissRequest = { onDismiss() },
             sheetState = sheetState,
-            containerColor = Color.Cyan
+            containerColor = colorResource(R.color.purple_alpha_70)
         ) {
             Column(
                 Modifier
-                    .height(250.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
+                    .height(300.dp)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row {
-                    Text("Date : ")
-                    // Button to open the date picker
-                    Button(onClick = { showDatePicker = true }) {
-                        Text("Select Date")
-                    }
-                    Text(selectedDate, fontSize = 30.sp)
-                }
-                Spacer(Modifier.height(20.dp))
+                Text("Create Weather Alert", fontSize = 20.sp)
 
-                Row {
-                    Text("Time : ")
-                    Button(onClick = { showTimePicker = true }) {
-                        Text("Select Time")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Date:", modifier = Modifier.weight(0.3f))
+                    Button(
+                        onClick = { showDatePicker = true },
+                        modifier = Modifier.weight(0.7f)
+                    ) {
+                        Text(if (selectedDate.isEmpty()) "Select Date" else selectedDate)
                     }
-                    Text(selectedTime, fontSize = 30.sp)
                 }
-                Row {
-                    Button({
-                        saveAlert("Suez",12.0,90.0,selectedDate,selectedTime)
-                        NotificationScheduler.scheduleNotification(
-                            long = 10.0,
-                            lat = 10.0,
-                            date = selectedDate,
-                            time = selectedTime,
-                            context = context
-                        )
-                    }) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Time:", modifier = Modifier.weight(0.3f))
+                    Button(
+                        onClick = { showTimePicker = true },
+                        modifier = Modifier.weight(0.7f)
+                    ) {
+                        Text(if (selectedTime.isEmpty()) "Select Time" else selectedTime)
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            // Only save if both date and time are selected
+                            if (selectedDate.isNotEmpty() && selectedTime.isNotEmpty()) {
+                                scope.launch {
+                                    // Get current location (simplified for this example)
+                                    //val locationRepository = alarmsViewModel.
+                                   // val location = locationRepository.getCurrentLocation()
+
+                                    saveAlert(
+                                        city =  "Current Location",
+                                        long =  0.0,
+                                        lat =  0.0,
+                                        date = selectedDate,
+                                        time = selectedTime
+                                    )
+
+                                    NotificationScheduler.scheduleNotification(
+                                        long =  0.0,
+                                        lat =  0.0,
+                                        date = selectedDate,
+                                        time = selectedTime,
+                                        context = context
+                                    )
+
+                                    onDismiss()
+                                }
+                            }
+                        },
+                        enabled = selectedDate.isNotEmpty() && selectedTime.isNotEmpty()
+                    ) {
                         Text("Save")
                     }
-                    Button({}) {
+
+                    Button(
+                        onClick = { onDismiss() }
+                    ) {
                         Text("Cancel")
                     }
                 }
-                // Date Picker Dialog
-                if (showDatePicker) {
-                    DatePickerDialog(
-                        onDismissRequest = { showDatePicker = false },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    // Convert milliseconds to formatted date string
-                                    datePickerState.selectedDateMillis?.let { millis ->
-                                        val formatter =
-                                            SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                                        selectedDate = formatter.format(Date(millis))
-                                    }
-                                    showDatePicker = false
+            }
+
+            // Date Picker Dialog
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                // Convert milliseconds to formatted date string
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val formatter =
+                                        SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                                    selectedDate = formatter.format(Date(millis))
                                 }
-                            ) {
-                                Text("OK")
+                                showDatePicker = false
                             }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDatePicker = false }) {
-                                Text("Cancel")
-                            }
+                        ) {
+                            Text("OK")
                         }
-                    ) {
-                        DatePicker(
-                            state = datePickerState,
-                            title = {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Text("Select a Date")
-                                }
-                            }
-                        )
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text("Cancel")
+                        }
                     }
-                }
-                // Time Picker Dialog
-                if (showTimePicker) {
-                    AlertDialog(
-                        onDismissRequest = { showTimePicker = false },
-                        title = { Text("Select Time") },
-                        text = {
-                            TimePicker(state = timePickerState)
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    // Format time
-                                    val timeString = String.format(
-                                        "%02d:%02d %s",
-                                        if (timePickerState.hour > 12) timePickerState.hour - 12 else if (timePickerState.hour == 0) 12 else timePickerState.hour,
-                                        timePickerState.minute,
-                                        if (timePickerState.hour >= 12) "PM" else "AM"
-                                    )
-
-                                    // Update selected date time
-                                    selectedTime = if (selectedTime.contains("/")) {
-                                        "${selectedTime.split(" ")[0]} $timeString"
-                                    } else {
-                                        timeString
-                                    }
-
-                                    showTimePicker = false
-                                }
+                ) {
+                    DatePicker(
+                        state = datePickerState,
+                        title = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
                             ) {
-                                Text("OK")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showTimePicker = false }) {
-                                Text("Cancel")
+                                Text("Select a Date")
                             }
                         }
                     )
                 }
-
             }
-        }
-    }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(
-            onClick = {
-                isBottomSheetVisible = !isBottomSheetVisible
+            // Time Picker Dialog
+            if (showTimePicker) {
+                AlertDialog(
+                    onDismissRequest = { showTimePicker = false },
+                    title = { Text("Select Time") },
+                    text = {
+                        TimePicker(state = timePickerState)
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                // Format time
+                                val timeString = String.format(
+                                    "%02d:%02d %s",
+                                    if (timePickerState.hour > 12) timePickerState.hour - 12 else if (timePickerState.hour == 0) 12 else timePickerState.hour,
+                                    timePickerState.minute,
+                                    if (timePickerState.hour >= 12) "PM" else "AM"
+                                )
+
+                                selectedTime = timeString
+                                showTimePicker = false
+                            }
+                        ) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showTimePicker = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
             }
-        ) {
-            Text(text = "Toggle Bottom Sheet")
         }
     }
 }
@@ -301,13 +361,17 @@ private fun saveAlert(city: String, long: Double, lat: Double, date: String, tim
     alarmsViewModel.saveAlert(city, long, lat, date, time)
 }
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
-    LazyColumn {
-        items(alerts.size) { index ->
-            val item = alerts[index]
+    LazyColumn(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        itemsIndexed(
+            items = alerts,
+            key = { _, alert -> "${alert.date}|${alert.time}" } // Composite key
+        ) { index, item ->
             val dismissState = rememberDismissState(
                 confirmStateChange = { dismissValue ->
                     if (dismissValue == DismissValue.DismissedToStart) {
@@ -323,59 +387,60 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
                 state = dismissState,
                 directions = setOf(DismissDirection.EndToStart),
                 background = {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .background(Color.White)
-//                            .padding(16.dp),
-//                        contentAlignment = Alignment.CenterEnd
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.Delete,
-//                            contentDescription = "Delete",
-//                            tint = Color.White,
-//                            modifier = Modifier.size(40.dp)
-//                        )
-//                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.Red)
+                            .padding(16.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 },
                 dismissContent = {
                     AlertItem(
-                        city = alerts[index].city,
-                        date = alerts[index].date,
-                        time = alerts[index].time
+                        city = item.city,
+                        date = item.date,
+                        time = item.time
                     )
                 }
             )
-
         }
     }
 }
-
 @Composable
 fun AlertItem(modifier: Modifier = Modifier, city: String, date: String, time: String) {
     Card(
-        modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .height(80.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp, horizontal = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(city)
-            Column {
-                Text(date)
-                Text(time)
+            Text(city, fontSize = 18.sp)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(date, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(time, fontSize = 14.sp, color = Color.Gray)
             }
-            Icon(imageVector = Icons.Default.Notifications, contentDescription = "")
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = "Alert",
+                tint = colorResource(R.color.purple_500)
+            )
         }
     }
 }
-
-@Composable
-fun BottomSheetPreview(modifier: Modifier = Modifier) {
-    BottomSheet()
-}
-
-

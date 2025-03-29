@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -34,8 +32,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -50,10 +46,11 @@ import com.example.weatherforecast.utils.Constants
 import java.util.Locale
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier,navController: NavController) {
+fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController) {
     val context = LocalContext.current
     // Create the repository using DataStoreManager
-    val repository = SettingsRepository(DataStoreManager(context.applicationContext),LanguageChangeHelper)
+    val repository =
+        SettingsRepository(DataStoreManager(context.applicationContext), LanguageChangeHelper)
     // Create a ViewModelFactory that takes the repository as a dependency
     val factory = SettingsViewModelFactory(repository)
 
@@ -87,7 +84,7 @@ fun LanguageBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewMo
         Modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(color =  colorResource(R.color.purple_alpha_30))
+            .background(color = colorResource(R.color.purple_alpha_30))
     ) {
         LanguageSelector(settingsViewModel)
     }
@@ -99,22 +96,28 @@ fun TemperatureBox(modifier: Modifier = Modifier, settingsViewModel: SettingsVie
         Modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(color =  colorResource(R.color.purple_alpha_30))
+            .background(color = colorResource(R.color.purple_alpha_30))
     ) {
-        TemperatureUnitSelector(settingsViewModel)
+        UnitSystemsSelector(settingsViewModel)
     }
 }
+
 @Composable
-fun LocationBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewModel,navController:NavController) {
+fun LocationBox(
+    modifier: Modifier = Modifier,
+    settingsViewModel: SettingsViewModel,
+    navController: NavController
+) {
     Box(
         Modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(color =  colorResource(R.color.purple_alpha_30))
+            .background(color = colorResource(R.color.purple_alpha_30))
     ) {
-        LocationSelector(settingsViewModel,navController)
+        LocationSelector(settingsViewModel, navController)
     }
 }
+
 @Composable
 fun LanguageSelector(settingsViewModel: SettingsViewModel) {
     val language by settingsViewModel.language.observeAsState()
@@ -155,7 +158,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 "ar",
                 language ?: "en"
             ) {
-                LanguageChangeHelper.changeLanguage(context,"ar")
+                LanguageChangeHelper.changeLanguage(context, "ar")
                 settingsViewModel.saveLanguage("ar")
             }
             RadioButtonRow(
@@ -163,7 +166,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 "en",
                 language ?: "en"
             ) {
-                LanguageChangeHelper.changeLanguage(context,"en")
+                LanguageChangeHelper.changeLanguage(context, "en")
                 settingsViewModel.saveLanguage("en")
             }
         }
@@ -171,9 +174,90 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
-    val tempUnit by settingsViewModel.tempUnit.observeAsState("metric")
+fun UnitSystemsSelector(settingsViewModel: SettingsViewModel) {
+    val unit by settingsViewModel.tempUnit.observeAsState("metric")
 
+    Column(modifier = Modifier.padding(8.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(25.dp),
+                    contentDescription = "",
+                    painter = painterResource(R.drawable.unit)
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.unit_systems),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            RadioButtonRow(
+                stringResource(R.string.metric),
+                "metric",
+                unit ?: "metric"
+            ) {
+                settingsViewModel.saveTemperatureUnit("metric")
+            }
+            Text(
+                "Temperature : Celsius ,speed : meter/sec",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                fontSize = 12.sp
+            )
+
+
+            RadioButtonRow(
+                stringResource(R.string.standard),
+                "standard",
+                unit ?: "metric"
+            ) {
+                settingsViewModel.saveTemperatureUnit("standard")
+            }
+            Text(
+                "Temperature : kelvin ,speed : miles/hour",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                fontSize = 12.sp
+            )
+
+
+            RadioButtonRow(
+                stringResource(R.string.imperial),
+                "imperial",
+                unit ?: "metric"
+            ) {
+                settingsViewModel.saveTemperatureUnit("imperial")
+            }
+            Text(
+                text = "Temperature : Fahrenheit ,speed : miles/hour",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                fontSize = 12.sp
+            )
+
+        }
+    }
+}
+
+@Composable
+fun LocationSelector(settingsViewModel: SettingsViewModel, navController: NavController) {
+    val locationSelection by settingsViewModel.locationSelection.observeAsState()
+    val context = LocalContext.current
     Column(modifier = Modifier.padding(8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -192,58 +276,6 @@ fun TemperatureUnitSelector(settingsViewModel: SettingsViewModel) {
                     painter = painterResource(R.drawable.map)
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.temp_unit),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            RadioButtonRow(
-                stringResource(R.string.metric),
-                "metric",
-                tempUnit ?: "metric"
-            ) {
-                settingsViewModel.saveTemperatureUnit("metric")
-            }
-            RadioButtonRow(
-                stringResource(R.string.standard),
-                "standard",
-                tempUnit ?: "metric"
-            ) {
-                settingsViewModel.saveTemperatureUnit("standard")
-            }
-            RadioButtonRow(
-                stringResource(R.string.imperial),
-                "imperial",
-                tempUnit ?: "metric"
-            ) {
-                settingsViewModel.saveTemperatureUnit("imperial")
-            }
-        }
-    }
-}
-
-@Composable
-fun LocationSelector(settingsViewModel: SettingsViewModel,navController:NavController) {
-    val locationSelection by settingsViewModel.locationSelection.observeAsState()
-    val context = LocalContext.current
-    Column(modifier = Modifier.padding(8.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.map),
-                contentDescription = "Language Icon",
-                tint = Color.Red,
-                modifier = Modifier.size(32.dp)
-            )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.location_select),
@@ -282,7 +314,8 @@ fun RadioButtonRow(
     label: String,
     value: String,
     selected: String,
-    onSelect: (String) -> Unit) {
+    onSelect: (String) -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable {

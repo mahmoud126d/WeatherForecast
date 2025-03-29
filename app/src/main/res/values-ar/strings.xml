@@ -8,7 +8,7 @@
     <string name="hourly_forecast">التوقعات لكل ساعة</string>
     <string name="day_forecast">توقعات اليوم</string>
     <string name="language">اللغة</string>
-    <string name="temp_unit">وحده درجة الحرارة</string>
+    <string name="unit_systems">وحده درجة الحرارة</string>
     <string name="ar">العربية</string>
     <string name="en">الإنجليزية</string>
     <string name="standard">قياسي</string>

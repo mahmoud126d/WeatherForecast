@@ -7,7 +7,7 @@
     <string name="hourly_forecast">Hourly forecast</string>
     <string name="day_forecast">Day forecast</string>
     <string name="language">Language</string>
-    <string name="temp_unit">Temp Unit</string>
+    <string name="unit_systems">Unit Systems</string>
     <string name="ar">Arabic</string>
     <string name="en">English</string>
     <string name="standard">standard</string>

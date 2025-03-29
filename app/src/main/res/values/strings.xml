@@ -25,4 +25,5 @@
     <string name="settings">settings</string>
     <string name="m_s">m/s</string>
     <string name="mph">mil/h</string>
+    <string name="last_update">Last Update</string>
 </resources>

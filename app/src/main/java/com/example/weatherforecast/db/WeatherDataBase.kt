@@ -8,7 +8,7 @@ import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.HomeWeather
 
-@Database(entities = arrayOf(CurrentWeather::class, AlertData::class, HomeWeather::class), version = 4)
+@Database(entities = arrayOf(CurrentWeather::class, AlertData::class, HomeWeather::class), version = 5)
 abstract class WeatherDataBase :RoomDatabase(){
     abstract fun getWeatherDao() : WeatherDao
     companion object{

@@ -44,12 +44,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -59,6 +61,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.utils.DateUtils
 import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.delay
 
@@ -111,12 +114,12 @@ fun RefreshableScreen(
 
                 is Response.Success -> {
                     val currentWeather = dailyWeather.data
-
+                    Log.d(TAG, "RefreshableScreen: ${currentWeather.lastUpdate}")
                     item {
                         WeatherInfoCard(
                             currentWeather,
                             contentDescription = "",
-                            formattedDateTime = currentWeather.lastUpdate,
+                            formattedDateTime = LanguageChangeHelper.formatDateBasedOnLocale(currentWeather.lastUpdate),
                         )
                     }
                     item {
@@ -252,11 +255,11 @@ fun WeatherInfoCard(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ){
                         Text(
-                            text = "last update",
+                            text = stringResource(R.string.last_update),
                         )
                         Text(
                             text = formattedDateTime,
-                            fontSize = 20.sp,
+                            fontSize = 14.sp,
                         )
                     }
                     Column(
@@ -326,7 +329,7 @@ fun WeatherStateGrid(
                 painterResource(R.drawable.pressure_gauge),
                 "description",
                 stringResource(R.string.pressure),
-                pressure.toDouble(),
+                hPaToPercentage(pressure),
                 unit = "%",
                 modifier = Modifier.weight(1f),
             )
@@ -421,7 +424,6 @@ fun WeatherStateCard(
     }
 }
 
-
 //@Preview(showSystemUi = true, device = Devices.PIXEL_4)
 @Composable
 fun WeatherPeriodBox(
@@ -430,6 +432,7 @@ fun WeatherPeriodBox(
     currentWeather: CurrentWeather,
 ) {
     val title2 = stringResource(R.string.hourly_forecast)
+    val layoutDirection = LocalLayoutDirection.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -464,26 +467,36 @@ fun WeatherPeriodBox(
                     fontWeight = FontWeight.Bold
                 )
             }
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
 
+            LazyRow(
+                reverseLayout = layoutDirection == LayoutDirection.Rtl,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                ) {
                 if (title == title2) {
-                    items(currentWeather.listOfHourlyWeather.size) { index ->
+                    val hourlyWeatherList = if (layoutDirection == LayoutDirection.Rtl) {
+                        currentWeather.listOfHourlyWeather.reversed()
+                    } else {
+                        currentWeather.listOfHourlyWeather
+                    }
+                    items(hourlyWeatherList.size) { index ->
                         HourlyWeatherColumn(
-                            currentWeather.listOfHourlyWeather[index].time,
+                            hourlyWeatherList[index].time,
                             painterResource(R.drawable.cloudandsun),
-                            "${LanguageChangeHelper.formatNumber(currentWeather.listOfHourlyWeather[index].temp.toInt())}${tempUnitSymbol}"
+                            "${LanguageChangeHelper.formatNumber(hourlyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
                 } else {
-                    items(currentWeather.listOfDayWeather.size) { index ->
+                    val dailyWeatherList = if (layoutDirection == LayoutDirection.Rtl) {
+                        currentWeather.listOfDayWeather.reversed()
+                    } else {
+                        currentWeather.listOfDayWeather
+                    }
+                    items(dailyWeatherList.size) { index ->
                         HourlyWeatherColumn(
-
-                            currentWeather.listOfDayWeather[index].time,
+                            dailyWeatherList[index].time,
                             painterResource(R.drawable.cloudandsun),
-                            "${LanguageChangeHelper.formatNumber(currentWeather.listOfDayWeather[index].temp.toInt())}${tempUnitSymbol}"
+                            "${LanguageChangeHelper.formatNumber(dailyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
                 }
@@ -512,7 +525,9 @@ fun HourlyWeatherColumn(
     ){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.background(color = colorResource(R.color.purple_alpha_70)).padding(12.dp),
+            modifier = Modifier
+                .background(color = colorResource(R.color.purple_alpha_70))
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(time)
@@ -543,8 +558,7 @@ fun LoadingAnimation(modifier: Modifier = Modifier
 
 }
 
-fun hPaToPercentage(hPa: Int): String {
+fun hPaToPercentage(hPa: Int): Double {
     val standardPressure = 1013.25
-    return ((hPa / standardPressure) * 100).toString()
+    return (hPa.toDouble() / standardPressure) * 100
 }
-

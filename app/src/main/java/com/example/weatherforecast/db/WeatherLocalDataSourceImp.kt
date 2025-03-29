@@ -18,8 +18,8 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
         return dao.getAllWeather()
     }
 
-    override suspend fun getWeather(cityName: String): Flow<CurrentWeather?> {
-        return dao.getWeatherByCity(cityName)
+    override suspend fun getWeather(lon: Double, lat: Double): Flow<CurrentWeather?> {
+        return dao.getWeatherLatLon(lon, lat)
     }
 
     override suspend fun insertAlert(alert: AlertData): Long {

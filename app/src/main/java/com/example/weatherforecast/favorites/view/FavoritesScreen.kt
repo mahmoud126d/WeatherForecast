@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.weatherforecast.AndroidConnectivityObserver
+import com.example.weatherforecast.ConnectivityRepository
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
@@ -69,12 +71,13 @@ import com.example.weatherforecast.utils.Constants
 import kotlinx.coroutines.launch
 
 lateinit var favoritesViewModel: FavoritesViewModel
-
+private const val TAG = "FavoritesScreen"
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    Log.d(TAG, "FavoritesScreen: ")
     val context = LocalContext.current
 
     val factory = FavoritesViewModelFactory(
@@ -86,9 +89,15 @@ fun FavoritesScreen(
 
         ),
        LocationRepository(LocationManager(context)),
+        ConnectivityRepository(
+            AndroidConnectivityObserver(
+                context = context.applicationContext
+            )
+        )
     )
     favoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
+        favoritesViewModel.getConnectivityState()
         favoritesViewModel.getAllFavorites()
 
     }
@@ -131,13 +140,25 @@ fun FavoritesScreen(
                         )
                         when (result) {
                             SnackbarResult.ActionPerformed -> {
-
+                                favoritesViewModel.undoDelete()
                             }
 
                             SnackbarResult.Dismissed -> {
 
                             }
                         }
+                    }
+
+                }
+            }
+            LaunchedEffect(Unit) {
+                favoritesViewModel.getAllFavorites()
+                favoritesViewModel.internetToastEvent.collect { message ->
+                    coroutineScope.launch {
+                         snackbarHostState.showSnackbar(
+                            message = message,
+                            duration = SnackbarDuration.Short,
+                        )
                     }
 
                 }
@@ -157,12 +178,14 @@ fun FavoriteColumn(
     val favoriteWeatherState = favoritesViewModel.productFavoriteList.collectAsState()
 
     LazyColumn(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         itemsIndexed(
             items = favoriteWeatherState.value,
-            key = { _, item -> item.city }
+            key = { _, item -> item.lon }
         ) { index, item ->
             val dismissState = rememberDismissState(
                 confirmStateChange = { dismissValue ->
@@ -200,7 +223,7 @@ fun FavoriteColumn(
                         country = "Egypt",
                         fullAddress = item.city,
                         navigate = {
-                            favoritesViewModel.getWeather(item.city)
+                            favoritesViewModel.getWeather(item.lon,item.lat)
                             navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
                         }
                     )

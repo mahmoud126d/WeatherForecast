@@ -23,4 +23,5 @@
     <string name="settings">الاعدادات</string>
     <string name="m_s">م/ث</string>
     <string name="mph">ميل/ساعه</string>
+    <string name="last_update">اخر تحديث</string>
 </resources>

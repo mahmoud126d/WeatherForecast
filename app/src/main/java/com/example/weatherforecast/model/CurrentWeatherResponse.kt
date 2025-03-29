@@ -13,6 +13,7 @@ data class FiveDaysWeatherResponse(
 
 
 data class CurrentWeatherResponse(
+    val coord: Coord,
     val main: Main,
     val weather: List<Weather>,
     val name: String,
@@ -40,6 +41,10 @@ data class WindSpeed(
 data class Cloud(
     val all: Int
 )
+data class Coord(
+    val lon:Double,
+    val lat:Double
+)
 data class DayWeather(
     val temp:Double,
     val icon:String,
@@ -49,6 +54,8 @@ lateinit var currentWeather: CurrentWeather
 @RequiresApi(Build.VERSION_CODES.O)
 fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
     currentWeather = CurrentWeather(
+        lat = coord.lat,
+        lon = coord.lon,
         temperature = main.temp,
         humidity = main.humidity,
         description = weather.firstOrNull()?.description ?: "No description",

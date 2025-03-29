@@ -45,7 +45,8 @@ private const val TAG = "HomeScreen"
 
 private const val MY_LOCATION_PERMISSION_ID = 5005
 lateinit var tempUnitSymbol: String
-lateinit var speedUnitSymbol:String
+lateinit var speedUnitSymbol: String
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen() {
@@ -64,9 +65,11 @@ fun HomeScreen() {
             DataStoreManager(context.applicationContext),
             LanguageChangeHelper
         ),
-        ConnectivityRepository(AndroidConnectivityObserver(
-            context = context.applicationContext
-        ))
+        ConnectivityRepository(
+            AndroidConnectivityObserver(
+                context = context.applicationContext
+            )
+        )
 
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
@@ -98,19 +101,20 @@ fun HomeScreen() {
             )
         }
         val unit = homeViewModel.getTemperatureUnit()
-         when (unit) {
+        when (unit) {
             "metric" -> {
                 tempUnitSymbol = context.getString(R.string.c)
-                speedUnitSymbol =context.getString(R.string.m_s)
+                speedUnitSymbol = context.getString(R.string.m_s)
             }
+
             "imperial" -> {
                 tempUnitSymbol = context.getString(R.string.f)
                 speedUnitSymbol = context.getString(R.string.mph)
             }
-            else ->
-            {
+
+            else -> {
                 tempUnitSymbol = context.getString(R.string.k)
-                speedUnitSymbol =""
+                speedUnitSymbol = ""
             }
         }
     }

@@ -1,12 +1,16 @@
 package com.example.weatherforecast.favorites.view
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.weatherforecast.AndroidConnectivityObserver
+import com.example.weatherforecast.ConnectivityRepository
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
@@ -21,6 +25,7 @@ import com.example.weatherforecast.utils.Constants
 
 private const val TAG = "FavoriteMapScreen"
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FavoriteMapScreen(
     modifier: Modifier = Modifier,
@@ -37,6 +42,11 @@ fun FavoriteMapScreen(
             )
         ),
         LocationRepository(LocationManager(context)),
+        ConnectivityRepository(
+            AndroidConnectivityObserver(
+                context = context.applicationContext
+            )
+        )
     )
     val favoritesViewModel: FavoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
@@ -49,11 +59,8 @@ fun FavoriteMapScreen(
         onButtonClick = { latitude, longitude ->
             // Now you can use latitude and longitude directly
             Log.d("ProfileScreen", "Selected Location: Lat $latitude, Lng $longitude")
-            favoritesViewModel.getCurrentWeather(longitude,latitude)
-            favoritesViewModel.getHourlyWeather(longitude,latitude)
-            favoritesViewModel.getDailyWeather(longitude,latitude)
-            // Example: Save to ViewModel or local storage
-            //viewModel.saveHomeLocation(latitude, longitude)
+
+            favoritesViewModel.getWeather(longitude,latitude)
 
             // Navigate to home screen
             navController.navigate(Constants.FAVORITES_SCREEN)

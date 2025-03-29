@@ -19,11 +19,11 @@ interface WeatherDao {
     @Delete
     suspend fun deleteWeather(weather: CurrentWeather):Int
 
-    @Query("SELECT * FROM current_weather")
+    @Query("SELECT * FROM CurrentWeather")
     fun getAllWeather():Flow<List<CurrentWeather>>
 
-    @Query("SELECT * FROM current_weather WHERE city = :cityName LIMIT 1")
-    fun getWeatherByCity(cityName: String): Flow<CurrentWeather?>
+    @Query("SELECT * FROM CurrentWeather WHERE lat = :latitude AND lon = :longitude LIMIT 1")
+    fun getWeatherLatLon( longitude: Double,latitude: Double): Flow<CurrentWeather?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlert(alertData: AlertData):Long
@@ -37,9 +37,11 @@ interface WeatherDao {
     @Query("DELETE FROM AlertData WHERE timestamp < :currentTime")
     suspend fun deleteOldAlerts(currentTime: Long):Int
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertHomeWeather(weather: HomeWeather):Long
 
-    @Query("SELECT * FROM  home_weather LIMIT 1")
-    fun getHomeWeather(): Flow<HomeWeather?>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHomeWeather(weather: HomeWeather): Long
+
+    @Query("SELECT * FROM home_weather WHERE id = 1 LIMIT 1")
+     fun getHomeWeather(): Flow<HomeWeather?>
+
 }

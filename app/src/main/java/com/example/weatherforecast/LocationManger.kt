@@ -62,7 +62,7 @@ class LocationManager(context: Context) {
                     val address = addresses.getOrNull(0)
                     val city = address?.subAdminArea
                     _cityNameFlow.value = city ?: "Unknown City"
-                    Log.d("LocationManager", "City Name: ${address?.subAdminArea}")
+                    Log.d("LocationManager", "City Name: ${address}")
                 }
             } else {
                 val addresses = geocoder.getFromLocation(latitude, longitude, 1)

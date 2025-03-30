@@ -6,6 +6,8 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.AndroidConnectivityObserver
+import com.example.weatherforecast.home.viewmodel.HomeViewModel
+import com.example.weatherforecast.home.viewmodel.HomeViewModel.Companion
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
@@ -13,6 +15,7 @@ import com.example.weatherforecast.model.toFiveDaysWeather
 import com.example.weatherforecast.model.toHourlyWeather
 import com.example.weatherforecast.repository.CurrentWeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
+import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.DateUtils
 import com.example.weatherforecast.utils.Response
@@ -27,11 +30,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.Stack
 
 class FavoritesViewModel(
     private val weatherRepository: CurrentWeatherRepository,
     private var locationRepo: LocationRepository,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     companion object {
@@ -60,6 +65,7 @@ class FavoritesViewModel(
     private val _dailyWeather = MutableStateFlow<Response>(Response.Loading)
     val dailyWeather: StateFlow<Response> = _dailyWeather.asStateFlow()
 
+
     private val deletedWeatherStack = Stack<CurrentWeather>()
 
 
@@ -78,11 +84,6 @@ class FavoritesViewModel(
     }
 
     fun isOnline() = isOnline
-
-    private fun askForAddress(lat: Double, long: Double) {
-        locationRepo.getAddress(lat, long)
-    }
-
 
 
     private fun calculateDailyAverages(weatherList: List<DayWeather>): List<DayWeather> {
@@ -132,14 +133,14 @@ class FavoritesViewModel(
             }
         }
     }
+
     private fun saveWeather(weather: CurrentWeather) {
         Log.d(TAG, "saveWeather: ")
         viewModelScope.launch(Dispatchers.IO) {
             val cityName = locationRepo.cityNameFlow.first() ?: "No City Name"
             weather.address = cityName
-            if (weatherRepository.insertWeather(weather) > 0) {
-                _toastEvent.emit("added to Favorite")
-            } else {
+            weather.country = getCountryName(weather.country)
+            if (weatherRepository.insertWeather(weather) < 0) {
                 _toastEvent.emit("failed to add to Favorite")
             }
         }
@@ -147,17 +148,20 @@ class FavoritesViewModel(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getWeather(longitude: Double, latitude: Double) {
-        Log.d(TAG, "getWeather: ")
         if (isOnline) {
-            Log.d(TAG, "fav online")
-            askForAddress(longitude, latitude)
+            var unit: String
+            var language: String
             viewModelScope.launch(Dispatchers.IO) {
                 try {
+                    unit =
+                        settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+                    language =
+                        settingsRepository.languageFlow.first() ?: DEFAULT_LANGUAGE
                     weatherRepository.getCurrentWeather(
                         latitude,
                         longitude,
-                        "metric",
-                        "en",
+                        unit,
+                        language,
                         Constants.API_KEY
                     )
                         .catch {
@@ -219,9 +223,11 @@ class FavoritesViewModel(
                         .collect { response ->
                             val weatherData = response.toFiveDaysWeather()
                             val dailyAverages = calculateDailyAverages(weatherData.listOfDayWeather)
-                            _dailyWeather.value = Response.Success(weatherData.copy(
-                                listOfDayWeather = dailyAverages,
-                            ))
+                            _dailyWeather.value = Response.Success(
+                                weatherData.copy(
+                                    listOfDayWeather = dailyAverages,
+                                )
+                            )
                             Log.d(
                                 TAG,
                                 "getDailyWeather:${weatherData.copy(listOfDayWeather = dailyAverages)} "
@@ -251,12 +257,18 @@ class FavoritesViewModel(
             }
         }
     }
-
+    suspend fun getTemperatureUnit(): String {
+        return settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+    }
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getCurrentDateTime(): String {
         val current = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
         return current.format(formatter)
+    }
+
+    private fun getCountryName(countryCode: String): String {
+        return Locale("", countryCode).displayCountry
     }
 
 }

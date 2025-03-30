@@ -22,6 +22,7 @@ data class CurrentWeather(
     val date:String= "Default Date",
     val icon:String= "Default Date",
     var address:String = "",
+    var country:String ="",
     var listOfHourlyWeather:List<DayWeather> = emptyList(),
     var listOfDayWeather:List<DayWeather> = emptyList(),
     var lastUpdate:String = ""

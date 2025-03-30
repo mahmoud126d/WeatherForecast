@@ -259,7 +259,7 @@ fun WeatherInfoCard(
                         )
                         Text(
                             text = formattedDateTime,
-                            fontSize = 14.sp,
+                            fontSize = 12.sp,
                         )
                     }
                     Column(

@@ -57,6 +57,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.weatherforecast.AndroidConnectivityObserver
 import com.example.weatherforecast.ConnectivityRepository
+import com.example.weatherforecast.DataStoreManager
+import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
@@ -64,15 +66,21 @@ import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModel
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModelFactory
 import com.example.weatherforecast.home.view.RefreshableScreen
+import com.example.weatherforecast.home.view.speedUnitSymbol
+import com.example.weatherforecast.home.view.tempUnitSymbol
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
+import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
 import kotlinx.coroutines.launch
 
 lateinit var favoritesViewModel: FavoritesViewModel
 private const val TAG = "FavoritesScreen"
+lateinit var tempUnitSymbol: String
+lateinit var speedUnitSymbol: String
+
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
@@ -90,6 +98,10 @@ fun FavoritesScreen(
 
         ),
        LocationRepository(LocationManager(context)),
+        SettingsRepository(
+            DataStoreManager(context.applicationContext),
+            LanguageChangeHelper
+        )
 
     )
     favoritesViewModel = viewModel(factory = factory)
@@ -172,61 +184,70 @@ fun FavoriteColumn(
     navController: NavHostController
 ) {
     val favoriteWeatherState = favoritesViewModel.productFavoriteList.collectAsState()
-
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        itemsIndexed(
-            items = favoriteWeatherState.value,
-            key = { _, item -> item.lon }
-        ) { index, item ->
-            val dismissState = rememberDismissState(
-                confirmStateChange = { dismissValue ->
-                    if (dismissValue == DismissValue.DismissedToStart) {
-                        favoritesViewModel.deleteFromFavorite(item)
-                        true
-                    } else {
-                        false
+    if (favoriteWeatherState.value.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("No favorites set. Tap + to add a weather alert.")
+        }
+    }else{
+        LazyColumn(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(
+                items = favoriteWeatherState.value,
+                key = { _, item -> item.lon }
+            ) { index, item ->
+                val dismissState = rememberDismissState(
+                    confirmStateChange = { dismissValue ->
+                        if (dismissValue == DismissValue.DismissedToStart) {
+                            favoritesViewModel.deleteFromFavorite(item)
+                            true
+                        } else {
+                            false
+                        }
                     }
-                }
-            )
+                )
 
-            SwipeToDismiss(
-                state = dismissState,
-                directions = setOf(DismissDirection.EndToStart),
-                background = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.Red)
-                            .padding(16.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = Color.White,
-                            modifier = Modifier.size(28.dp)
+                SwipeToDismiss(
+                    state = dismissState,
+                    directions = setOf(DismissDirection.EndToStart),
+                    background = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.Red)
+                                .padding(16.dp),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    },
+                    dismissContent = {
+                        WeatherItem(
+                            country = item.country,
+                            fullAddress = item.city,
+                            navigate = {
+                                favoritesViewModel.getWeather(item.lon,item.lat)
+                                navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
+                            }
                         )
                     }
-                },
-                dismissContent = {
-                    WeatherItem(
-                        country = "Egypt",
-                        fullAddress = item.city,
-                        navigate = {
-                            favoritesViewModel.getWeather(item.lon,item.lat)
-                            navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
-                        }
-                    )
-                }
-            )
+                )
+            }
         }
     }
+
 }
 
 @Composable

@@ -20,7 +20,8 @@ data class CurrentWeatherResponse(
     val wind: WindSpeed,
     val clouds: Cloud,
     @SerializedName("dt_txt")
-    val date:String
+    val date:String,
+    val sys:Sys
 )
 
 data class Main(
@@ -45,6 +46,9 @@ data class Coord(
     val lon:Double,
     val lat:Double
 )
+data class Sys(
+    val country:String
+)
 data class DayWeather(
     val temp:Double,
     val icon:String,
@@ -64,6 +68,7 @@ fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
         city = name,
         speed = wind.speed,
         icon = weather.firstOrNull()?.icon ?: "No icon",
+        country = sys.country
         )
     return currentWeather
 }

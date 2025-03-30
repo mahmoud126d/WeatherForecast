@@ -56,9 +56,10 @@ class CurrentWeatherRepositoryImpl private constructor(
         return weatherLocalDataSource.getAllAlerts()
     }
 
-    override suspend fun deleteAlert(alertData: AlertData): Int {
-        return weatherLocalDataSource.deleteAlert(alertData)
+    override suspend fun deleteAlert(date: String, time: String): Int {
+        return weatherLocalDataSource.deleteAlert(date,time)
     }
+
 
     override suspend fun deleteOldAlerts(currentTime: Long): Int {
         return weatherLocalDataSource.deleteOldAlerts(currentTime)
@@ -70,6 +71,10 @@ class CurrentWeatherRepositoryImpl private constructor(
 
     override suspend fun getHomeWeather(): Flow<HomeWeather?> {
         return weatherLocalDataSource.getHomeWeather()
+    }
+
+    override suspend fun getWorkId(date: String, time: String): String? {
+        return weatherLocalDataSource.getWorkId(date,time)
     }
 
     companion object {

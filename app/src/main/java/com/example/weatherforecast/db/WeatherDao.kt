@@ -28,15 +28,17 @@ interface WeatherDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlert(alertData: AlertData):Long
 
+    @Query("SELECT workId FROM AlertData WHERE date = :date AND time = :time")
+    suspend fun getWorkId(date: String, time: String): String?
+
     @Query("SELECT * FROM AlertData")
     fun getAllAlerts():Flow<List<AlertData>>
 
-    @Delete
-    suspend fun deleteAlert(alertData: AlertData):Int
+    @Query("DELETE FROM AlertData WHERE date = :date AND time = :time")
+    suspend fun deleteAlert(date: String, time: String):Int
 
     @Query("DELETE FROM AlertData WHERE timestamp < :currentTime")
     suspend fun deleteOldAlerts(currentTime: Long):Int
-
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHomeWeather(weather: HomeWeather): Long

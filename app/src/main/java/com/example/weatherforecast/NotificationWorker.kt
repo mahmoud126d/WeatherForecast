@@ -32,9 +32,6 @@ import kotlinx.coroutines.runBlocking
 
 private const val TAG = "NotificationWorker"
 
-
-
-
 class NotificationWorker(
     val context: Context,
     workerParams: WorkerParameters,
@@ -42,7 +39,6 @@ class NotificationWorker(
     Worker(context, workerParams) {
 
     private val _currentWeather = MutableStateFlow<Response>(Response.Loading)
-    val currentWeather: StateFlow<Response> = _currentWeather.asStateFlow()
 
     private var repo : CurrentWeatherRepository= CurrentWeatherRepositoryImpl.getInstance(
         CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
@@ -61,6 +57,7 @@ class NotificationWorker(
         return try {
             val long = inputData.getDouble("KEY_LONG",0.0)
             val lat = inputData.getDouble("KEY_LAT",0.0)
+            Log.d(TAG, "doWork: long $long lat $lat")
             runBlocking {
                 repo.getCurrentWeather(
                     lat = lat,
@@ -80,6 +77,7 @@ class NotificationWorker(
                         showNotification(context, currentWeatherData.city)
                         _currentWeather.value = Response.Success(currentWeatherData)
                     }
+                repo.deleteOldAlerts(System.currentTimeMillis())
             }
             Result.success()
         } catch (ex: Exception) {

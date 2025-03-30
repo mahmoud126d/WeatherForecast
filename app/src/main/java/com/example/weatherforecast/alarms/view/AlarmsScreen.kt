@@ -1,6 +1,7 @@
 package com.example.weatherforecast.alarms.view
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -62,6 +63,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherforecast.DataStoreManager
+import com.example.weatherforecast.LanguageChangeHelper
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.NotificationScheduler
 import com.example.weatherforecast.R
@@ -74,6 +77,7 @@ import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
+import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -86,6 +90,7 @@ private lateinit var alarmsViewModel: AlarmsViewModel
 @Composable
 fun AlarmsScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val application = context.applicationContext as Application
     val factory = AlarmsViewModelFactory(
         CurrentWeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
@@ -94,6 +99,17 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
             )
         ),
         LocationRepository(LocationManager(context)),
+        application,
+        CurrentWeatherRepositoryImpl.getInstance(
+            CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
+            WeatherLocalDataSourceImp(
+                WeatherDataBase.getInstance(context).getWeatherDao()
+            )
+        ),
+        SettingsRepository(
+            DataStoreManager(context.applicationContext),
+            LanguageChangeHelper
+        )
     )
     alarmsViewModel = viewModel(factory = factory)
 
@@ -111,7 +127,11 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
                 containerColor = colorResource(R.color.purple_500),
                 contentColor = Color.White
             ) {
-                Icon(Icons.Default.Notifications, contentDescription = "Add Alert", tint = Color.White)
+                Icon(
+                    Icons.Default.Notifications,
+                    contentDescription = "Add Alert",
+                    tint = Color.White
+                )
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -141,6 +161,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -241,28 +262,18 @@ fun BottomSheet(
                 ) {
                     Button(
                         onClick = {
-                            // Only save if both date and time are selected
                             if (selectedDate.isNotEmpty() && selectedTime.isNotEmpty()) {
                                 scope.launch {
-                                    // Get current location (simplified for this example)
-                                    //val locationRepository = alarmsViewModel.
-                                   // val location = locationRepository.getCurrentLocation()
-
-                                    saveAlert(
-                                        city =  "Current Location",
-                                        long =  0.0,
-                                        lat =  0.0,
-                                        date = selectedDate,
-                                        time = selectedTime
+                                    val alert = AlertData(
+                                        "Cairo",
+                                        selectedDate,
+                                        selectedTime,
+                                        0.0,
+                                        0.0,
+                                        System.currentTimeMillis(),
+                                        ""
                                     )
-
-                                    NotificationScheduler.scheduleNotification(
-                                        long =  0.0,
-                                        lat =  0.0,
-                                        date = selectedDate,
-                                        time = selectedTime,
-                                        context = context
-                                    )
+                                    alarmsViewModel.scheduleNotification(alert)
 
                                     onDismiss()
                                 }
@@ -288,7 +299,6 @@ fun BottomSheet(
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                // Convert milliseconds to formatted date string
                                 datePickerState.selectedDateMillis?.let { millis ->
                                     val formatter =
                                         SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
@@ -357,11 +367,6 @@ fun BottomSheet(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-private fun saveAlert(city: String, long: Double, lat: Double, date: String, time: String) {
-    alarmsViewModel.saveAlert(city, long, lat, date, time)
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
@@ -373,12 +378,12 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
     ) {
         itemsIndexed(
             items = alerts,
-            key = { _, alert -> "${alert.date}|${alert.time}" } // Composite key
+            key = { _, alert -> "${alert.date}|${alert.time}" }
         ) { index, item ->
             val dismissState = rememberDismissState(
                 confirmStateChange = { dismissValue ->
                     if (dismissValue == DismissValue.DismissedToStart) {
-                        alarmsViewModel.deleteFromAlerts(item)
+                        alarmsViewModel.cancelNotification(item.date,item.time)
                         true
                     } else {
                         false
@@ -417,6 +422,7 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
         }
     }
 }
+
 @Composable
 fun AlertItem(modifier: Modifier = Modifier, city: String, date: String, time: String) {
     Card(

@@ -28,8 +28,9 @@ interface CurrentWeatherRepository {
     suspend fun getWeather(lon: Double, lat: Double): Flow<CurrentWeather?>
     suspend fun insertAlert(alertData: AlertData):Long
     suspend fun getAllAlerts(): Flow<List<AlertData>>?
-    suspend fun deleteAlert(alertData: AlertData):Int
+    suspend fun deleteAlert(date: String, time: String):Int
     suspend fun deleteOldAlerts(currentTime: Long):Int
     suspend fun insertHomeWeather(weather: HomeWeather):Long
     suspend fun getHomeWeather():Flow<HomeWeather?>
+    suspend fun getWorkId(date: String, time: String): String?
 }

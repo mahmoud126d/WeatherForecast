@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.log
 
 class HomeViewModel(
     private val weatherRepository: CurrentWeatherRepository,
@@ -107,6 +108,7 @@ class HomeViewModel(
                                         })
                                 }
                         } catch (ex: Exception) {
+                            Log.d(TAG, "getHomeDetails: ${ex.message}")
                             _currentWeather.value = Response.Failure(ex)
                         }
                     }

@@ -30,9 +30,10 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
         return dao.getAllAlerts()
     }
 
-    override suspend fun deleteAlert(alert: AlertData): Int {
-        return dao.deleteAlert(alert)
+    override suspend fun deleteAlert(date: String, time: String): Int {
+        return dao.deleteAlert(date,time)
     }
+
 
     override suspend fun deleteOldAlerts(currentTime: Long): Int {
         return dao.deleteOldAlerts(currentTime)
@@ -44,5 +45,9 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
 
     override suspend fun getHomeWeather(): Flow<HomeWeather?> {
         return dao.getHomeWeather()
+    }
+
+    override suspend fun getWorkId(date: String, time: String): String? {
+        return dao.getWorkId(date,time)
     }
 }

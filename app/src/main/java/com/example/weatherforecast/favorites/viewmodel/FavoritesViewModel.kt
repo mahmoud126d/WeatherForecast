@@ -139,7 +139,8 @@ class FavoritesViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val cityName = locationRepo.cityNameFlow.first() ?: "No City Name"
             weather.address = cityName
-            weather.country = getCountryName(weather.country)
+            weather.country = getCountryName(weather.country ?: "")
+
             if (weatherRepository.insertWeather(weather) < 0) {
                 _toastEvent.emit("failed to add to Favorite")
             }

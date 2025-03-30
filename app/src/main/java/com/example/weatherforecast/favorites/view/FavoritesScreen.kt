@@ -234,14 +234,16 @@ fun FavoriteColumn(
                         }
                     },
                     dismissContent = {
-                        WeatherItem(
-                            country = item.country,
-                            fullAddress = item.city,
-                            navigate = {
-                                favoritesViewModel.getWeather(item.lon,item.lat)
-                                navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
-                            }
-                        )
+                        item?.country?.let {
+                            WeatherItem(
+                                country = it,
+                                fullAddress = item.city,
+                                navigate = {
+                                    favoritesViewModel.getWeather(item.lon,item.lat)
+                                    navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
+                                }
+                            )
+                        }
                     }
                 )
             }

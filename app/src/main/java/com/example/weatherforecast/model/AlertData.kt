@@ -10,5 +10,6 @@ data class AlertData(
     val time:String,
     val long:Double,
     val lat:Double,
-    val timestamp: Long
+    val timestamp: Long,
+    val workId: String
 )

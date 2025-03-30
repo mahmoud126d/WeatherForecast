@@ -11,9 +11,8 @@ class HomeViewModelFactory(
     private var repo: CurrentWeatherRepository,
     private var locationRepo : LocationRepository,
     private var settingsRepository: SettingsRepository,
-    private val connectivityRepository: ConnectivityRepository
 ) :ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return HomeViewModel(repo,locationRepo,settingsRepository,connectivityRepository) as T
+        return HomeViewModel(repo,locationRepo,settingsRepository) as T
     }
 }

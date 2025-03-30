@@ -42,11 +42,7 @@ fun FavoriteMapScreen(
             )
         ),
         LocationRepository(LocationManager(context)),
-        ConnectivityRepository(
-            AndroidConnectivityObserver(
-                context = context.applicationContext
-            )
-        )
+
     )
     val favoritesViewModel: FavoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {

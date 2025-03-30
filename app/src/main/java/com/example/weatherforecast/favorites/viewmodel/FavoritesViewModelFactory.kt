@@ -9,10 +9,9 @@ import com.example.weatherforecast.repository.LocationRepository
 class FavoritesViewModelFactory(
     private var repo: CurrentWeatherRepository,
     private var locationRepo: LocationRepository,
-    private val connectivityRepository: ConnectivityRepository
 
     ) : ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FavoritesViewModel(repo,locationRepo,connectivityRepository) as T
+        return FavoritesViewModel(repo,locationRepo) as T
     }
 }

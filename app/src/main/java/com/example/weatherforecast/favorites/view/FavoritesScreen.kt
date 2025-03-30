@@ -5,6 +5,7 @@ package com.example.weatherforecast.favorites.view
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -89,15 +90,10 @@ fun FavoritesScreen(
 
         ),
        LocationRepository(LocationManager(context)),
-        ConnectivityRepository(
-            AndroidConnectivityObserver(
-                context = context.applicationContext
-            )
-        )
+
     )
     favoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
-        favoritesViewModel.getConnectivityState()
         favoritesViewModel.getAllFavorites()
 
     }
@@ -279,7 +275,7 @@ fun ItemPreview(modifier: Modifier = Modifier) {
 
 @Composable
 fun FavoriteWeatherScreen(modifier: Modifier = Modifier) {
-
+    val context = LocalContext.current
 
     val currentWeatherState = favoritesViewModel.currentWeather.collectAsState()
     val hourlyWeatherState = favoritesViewModel.hourlyWeather.collectAsState()
@@ -290,7 +286,9 @@ fun FavoriteWeatherScreen(modifier: Modifier = Modifier) {
         hourlyWeatherState = hourlyWeatherState,
         dailyWeatherState = dailyWeatherState,
         onRefresh = {
-
+            if (!favoritesViewModel.isOnline()) {
+                Toast.makeText(context, "You are offline", Toast.LENGTH_SHORT).show()
+            }
         },
     )
     Log.d(

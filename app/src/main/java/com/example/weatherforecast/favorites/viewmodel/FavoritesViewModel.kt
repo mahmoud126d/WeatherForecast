@@ -5,8 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherforecast.ConnectivityRepository
-
+import com.example.weatherforecast.AndroidConnectivityObserver
 import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
@@ -33,7 +32,6 @@ import java.util.Stack
 class FavoritesViewModel(
     private val weatherRepository: CurrentWeatherRepository,
     private var locationRepo: LocationRepository,
-    private val connectivityRepository: ConnectivityRepository
 ) : ViewModel() {
 
     companion object {
@@ -69,21 +67,20 @@ class FavoritesViewModel(
 
     private var lastDeleted: CurrentWeather? = null
 
-    private fun askForAddress(lat: Double, long: Double) {
-        locationRepo.getAddress(lat, long)
-    }
+    private var isOnline = false
 
-    val isOnline = connectivityRepository.isConnectedState
-    fun getConnectivityState() {
-        viewModelScope.launch {
-            connectivityRepository.isConnectedState.collect {
-                if (!it) {
-                    _internetToastEvent.emit("connection lost")
-                } else {
-                    _internetToastEvent.emit("You Are online")
-                }
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            AndroidConnectivityObserver.isConnected.collect {
+                isOnline = AndroidConnectivityObserver.isConnected.first()
             }
         }
+    }
+
+    fun isOnline() = isOnline
+
+    private fun askForAddress(lat: Double, long: Double) {
+        locationRepo.getAddress(lat, long)
     }
 
 
@@ -151,7 +148,7 @@ class FavoritesViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     fun getWeather(longitude: Double, latitude: Double) {
         Log.d(TAG, "getWeather: ")
-        if (isOnline.value) {
+        if (isOnline) {
             Log.d(TAG, "fav online")
             askForAddress(longitude, latitude)
             viewModelScope.launch(Dispatchers.IO) {

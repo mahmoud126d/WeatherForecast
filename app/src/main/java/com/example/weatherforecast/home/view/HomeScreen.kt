@@ -64,17 +64,12 @@ fun HomeScreen() {
         SettingsRepository(
             DataStoreManager(context.applicationContext),
             LanguageChangeHelper
-        ),
-        ConnectivityRepository(
-            AndroidConnectivityObserver(
-                context = context.applicationContext
-            )
         )
 
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
-        homeViewModel.getConnectivityState()
+
         homeViewModel.toastEvent.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
@@ -125,6 +120,9 @@ fun HomeScreen() {
         dailyWeatherState = homeViewModel.dailyWeather.collectAsState(),
         onRefresh = {
             homeViewModel.getHomeDetails()
+            if (!homeViewModel.isOnline()) {
+                Toast.makeText(context, "You are offline", Toast.LENGTH_SHORT).show()
+            }
         },
     )
 }

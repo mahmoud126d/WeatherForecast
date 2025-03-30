@@ -100,13 +100,13 @@ fun MainScreen(navController: NavHostController) {
             val currentRoute =
                 navController.currentBackStackEntryAsState().value?.destination?.route
             val title = when (currentRoute) {
-                Constants.HOME_SCREEN -> "Home"
-                Constants.ALARM_SCREEN -> "Alarms"
-                Constants.FAVORITES_SCREEN -> "Favorites"
-                Constants.SETTINGS_SCREEN -> "Settings"
-                Constants.MAP_SCREEN -> "Map"
-                Constants.FAVORITE_MAP_SCREEN -> "Favorite Map"
-                Constants.FAVORITE_WEATHER_SCREEN -> "Favorite Weather"
+                Constants.HOME_SCREEN -> stringResource(R.string.Home)
+                Constants.ALARM_SCREEN -> stringResource(R.string.alarm)
+                Constants.FAVORITES_SCREEN -> stringResource(R.string.favorites)
+                Constants.SETTINGS_SCREEN -> stringResource(R.string.settings)
+                Constants.MAP_SCREEN -> stringResource(R.string.map)
+                Constants.FAVORITE_MAP_SCREEN -> stringResource(R.string.map)
+                Constants.FAVORITE_WEATHER_SCREEN -> stringResource(R.string.favorites)
                 else -> stringResource(id = R.string.app_name)
             }
 

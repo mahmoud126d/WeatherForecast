@@ -58,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -125,7 +126,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No alerts set. Tap + to add a weather alert.")
+                    Text(stringResource(R.string.no_alerts_set_tap_to_add_a_weather_alert))
                 }
             } else {
                 AlertColumn(
@@ -211,12 +212,12 @@ fun BottomSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Date:", modifier = Modifier.weight(0.3f))
+                    Text(stringResource(R.string.date), modifier = Modifier.weight(0.3f))
                     Button(
                         onClick = { showDatePicker = true },
                         modifier = Modifier.weight(0.7f)
                     ) {
-                        Text(if (selectedDate.isEmpty()) "Select Date" else selectedDate)
+                        Text(if (selectedDate.isEmpty()) stringResource(R.string.select_date) else selectedDate)
                     }
                 }
 
@@ -224,12 +225,12 @@ fun BottomSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Time:", modifier = Modifier.weight(0.3f))
+                    Text(stringResource(R.string.time), modifier = Modifier.weight(0.3f))
                     Button(
                         onClick = { showTimePicker = true },
                         modifier = Modifier.weight(0.7f)
                     ) {
-                        Text(if (selectedTime.isEmpty()) "Select Time" else selectedTime)
+                        Text(if (selectedTime.isEmpty()) stringResource(R.string.select_time) else selectedTime)
                     }
                 }
 
@@ -269,13 +270,13 @@ fun BottomSheet(
                         },
                         enabled = selectedDate.isNotEmpty() && selectedTime.isNotEmpty()
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.save))
                     }
 
                     Button(
                         onClick = { onDismiss() }
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             }
@@ -312,7 +313,7 @@ fun BottomSheet(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Text("Select a Date")
+                                Text(stringResource(R.string.select_a_date))
                             }
                         }
                     )
@@ -323,7 +324,7 @@ fun BottomSheet(
             if (showTimePicker) {
                 AlertDialog(
                     onDismissRequest = { showTimePicker = false },
-                    title = { Text("Select Time") },
+                    title = { Text(stringResource(R.string.select_time)) },
                     text = {
                         TimePicker(state = timePickerState)
                     },
@@ -342,12 +343,12 @@ fun BottomSheet(
                                 showTimePicker = false
                             }
                         ) {
-                            Text("OK")
+                            Text(stringResource(R.string.ok))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showTimePicker = false }) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 )
@@ -365,7 +366,9 @@ private fun saveAlert(city: String, long: Double, lat: Double, date: String, tim
 @Composable
 fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
     LazyColumn(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         itemsIndexed(

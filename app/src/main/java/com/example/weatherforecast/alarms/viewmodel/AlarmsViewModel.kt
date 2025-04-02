@@ -9,7 +9,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.weatherforecast.NotificationWorker
 import com.example.weatherforecast.model.AlertData
-import com.example.weatherforecast.repository.CurrentWeatherRepository
+import com.example.weatherforecast.repository.WeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -28,10 +28,10 @@ import java.util.concurrent.TimeUnit
 
 
 class AlarmsViewModel(
-    private var repo: CurrentWeatherRepository,
+    private var repo: WeatherRepository,
     private var locationRepo : LocationRepository,
     private val application: Application,
-    private val weatherRepository: CurrentWeatherRepository,
+    private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository
 ) : AndroidViewModel(application){
 

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -37,7 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.LanguageHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.settings.viewmodel.SettingsViewModel
@@ -50,7 +49,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController) 
     val context = LocalContext.current
     // Create the repository using DataStoreManager
     val repository =
-        SettingsRepository(DataStoreManager(context.applicationContext), LanguageChangeHelper)
+        SettingsRepository(DataStoreManager(context.applicationContext), LanguageHelper)
     // Create a ViewModelFactory that takes the repository as a dependency
     val factory = SettingsViewModelFactory(repository)
 
@@ -158,7 +157,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 "ar",
                 language ?: "en"
             ) {
-                LanguageChangeHelper.changeLanguage(context, "ar")
+                LanguageHelper.changeLanguage(context, "ar")
                 settingsViewModel.saveLanguage("ar")
             }
             RadioButtonRow(
@@ -166,7 +165,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
                 "en",
                 language ?: "en"
             ) {
-                LanguageChangeHelper.changeLanguage(context, "en")
+                LanguageHelper.changeLanguage(context, "en")
                 settingsViewModel.saveLanguage("en")
             }
         }

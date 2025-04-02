@@ -9,7 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.work.CoroutineWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.weatherforecast.db.WeatherDataBase
@@ -17,17 +16,13 @@ import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
-import com.example.weatherforecast.repository.CurrentWeatherRepository
-import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
+import com.example.weatherforecast.repository.WeatherRepository
+import com.example.weatherforecast.repository.WeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
-import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
 import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 private const val TAG = "NotificationWorker"
@@ -40,7 +35,7 @@ class NotificationWorker(
 
     private val _currentWeather = MutableStateFlow<Response>(Response.Loading)
 
-    private var repo : CurrentWeatherRepository= CurrentWeatherRepositoryImpl.getInstance(
+    private var repo : WeatherRepository= WeatherRepositoryImpl.getInstance(
         CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
         WeatherLocalDataSourceImp(
             WeatherDataBase.getInstance(context).getWeatherDao()

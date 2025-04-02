@@ -1,18 +1,14 @@
 package com.example.weatherforecast.model
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 
-data class FiveDaysWeatherResponse(
-    val list: List<CurrentWeatherResponse>
+data class ForecastWeatherResponse(
+    val list: List<WeatherResponse>
 )
 
 
-data class CurrentWeatherResponse(
+data class WeatherResponse(
     val coord: Coord,
     val main: Main,
     val weather: List<Weather>,
@@ -54,10 +50,9 @@ data class DayWeather(
     val icon:String,
     var time:String
 )
-lateinit var currentWeather: CurrentWeather
-@RequiresApi(Build.VERSION_CODES.O)
-fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
-    currentWeather = CurrentWeather(
+lateinit var weatherData: WeatherData
+fun WeatherResponse.toCurrentWeather(): WeatherData {
+    weatherData = WeatherData(
         lat = coord.lat,
         lon = coord.lon,
         temperature = main.temp,
@@ -70,10 +65,10 @@ fun CurrentWeatherResponse.toCurrentWeather(): CurrentWeather {
         icon = weather.firstOrNull()?.icon ?: "No icon",
         country = sys.country
         )
-    return currentWeather
+    return weatherData
 }
 
-fun FiveDaysWeatherResponse.toFiveDaysWeather(): CurrentWeather {
+fun ForecastWeatherResponse.toFiveDaysWeather(): WeatherData {
     val list = mutableListOf<DayWeather>()
     for (current in this.list) {
         list.add(
@@ -84,10 +79,10 @@ fun FiveDaysWeatherResponse.toFiveDaysWeather(): CurrentWeather {
             )
         )
     }
-    currentWeather.listOfDayWeather = list
-    return currentWeather
+    weatherData.listOfDayWeather = list
+    return weatherData
 }
-fun FiveDaysWeatherResponse.toHourlyWeather(): CurrentWeather {
+fun ForecastWeatherResponse.toHourlyWeather(): WeatherData {
     val list = mutableListOf<DayWeather>()
     for (current in this.list) {
         list.add(
@@ -98,13 +93,12 @@ fun FiveDaysWeatherResponse.toHourlyWeather(): CurrentWeather {
             )
         )
     }
-    currentWeather.listOfHourlyWeather = list
-    return currentWeather
+    weatherData.listOfHourlyWeather = list
+    return weatherData
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
-fun CurrentWeather.toHomeWeather(): HomeWeather {
+fun WeatherData.toHomeWeather(): HomeWeather {
     return  HomeWeather(
         temperature = temperature,
         humidity = humidity,
@@ -119,9 +113,8 @@ fun CurrentWeather.toHomeWeather(): HomeWeather {
         listOfHourlyWeather = listOfHourlyWeather
     )
 }
-@RequiresApi(Build.VERSION_CODES.O)
-fun HomeWeather.toCurrentWeather(): CurrentWeather {
-    return  CurrentWeather(
+fun HomeWeather.toCurrentWeather(): WeatherData {
+    return  WeatherData(
         temperature = temperature,
         humidity = humidity,
         description = description,

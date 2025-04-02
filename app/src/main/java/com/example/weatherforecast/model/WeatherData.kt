@@ -1,14 +1,12 @@
 package com.example.weatherforecast.model
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 
 
 @Entity(primaryKeys = ["lon", "lat"])
-//@Entity(tableName = "current_weather")
 @TypeConverters(WeatherTypeConverters::class)
-data class CurrentWeather(
+data class WeatherData(
     val id: Int =0,
     val lon:Double = 0.0,
     val lat:Double=0.0,

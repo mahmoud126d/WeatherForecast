@@ -1,10 +1,9 @@
 package com.example.weatherforecast.network
 
-import com.example.weatherforecast.model.CurrentWeatherResponse
-import com.example.weatherforecast.model.FiveDaysWeatherResponse
+import com.example.weatherforecast.model.WeatherResponse
+import com.example.weatherforecast.model.ForecastWeatherResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import retrofit2.http.Query
 
 class CurrentWeatherRemoteDataSourceImpl(
     private val service: CurrentWeatherApiService
@@ -15,7 +14,7 @@ class CurrentWeatherRemoteDataSourceImpl(
         unit:String,
         lang:String,
         appId:String,
-    ): Flow<CurrentWeatherResponse> = flow {
+    ): Flow<WeatherResponse> = flow {
         val response = service.getCurrentWeather(lat,lon,unit,lang,appId).body()
         if(response!=null){
             emit(response)
@@ -30,7 +29,7 @@ class CurrentWeatherRemoteDataSourceImpl(
         unit:String,
         lang:String,
         appId:String,
-    ): Flow<FiveDaysWeatherResponse> = flow{
+    ): Flow<ForecastWeatherResponse> = flow{
         val response = service.getFiveDaysWeather(
             lat,
             lon,

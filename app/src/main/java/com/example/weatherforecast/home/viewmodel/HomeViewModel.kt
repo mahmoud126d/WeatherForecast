@@ -1,22 +1,15 @@
 package com.example.weatherforecast.home.viewmodel
 
 import android.location.Location
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.AndroidConnectivityObserver
-import com.example.weatherforecast.ConnectivityRepository
-import com.example.weatherforecast.model.CurrentWeather
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
 import com.example.weatherforecast.model.toHomeWeather
 import com.example.weatherforecast.model.toHourlyWeather
-import com.example.weatherforecast.repository.CurrentWeatherRepository
+import com.example.weatherforecast.repository.WeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
@@ -29,16 +22,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import kotlin.math.log
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class HomeViewModel(
-    private val weatherRepository: CurrentWeatherRepository,
+    private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -79,13 +72,11 @@ class HomeViewModel(
 
     fun isOnline() = isOnline
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getHomeDetails() {
         viewModelScope.launch(Dispatchers.IO) {
             AndroidConnectivityObserver.isConnected.collect {
                 if (isOnline) {
                     viewModelScope.launch(Dispatchers.IO) {
-                        //_toastEvent.emit("You Are online")
                         try {
                             val (latitude, longitude) = getLocationCoordinates()
                             val unit =
@@ -108,7 +99,6 @@ class HomeViewModel(
                                         })
                                 }
                         } catch (ex: Exception) {
-                            Log.d(TAG, "getHomeDetails: ${ex.message}")
                             _currentWeather.value = Response.Failure(ex)
                         }
                     }
@@ -122,14 +112,19 @@ class HomeViewModel(
                                 latitude,
                                 longitude,
                                 unit,
-                                "ar",
+                                "en",
                                 Constants.API_KEY
                             )
                                 .catch { ex -> _hourlyWeather.value = Response.Failure(ex) }
                                 .collect { response ->
+                                    val todayDate =
+                                        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                                            Date()
+                                        )
+
                                     val weatherData = response.toHourlyWeather().apply {
                                         listOfHourlyWeather = listOfHourlyWeather
-                                            .take(MAX_HOURLY_FORECASTS)
+                                            .filter { it.time.startsWith(todayDate) }
                                             .map { it.apply { time = DateUtils.extractTime(time) } }
                                     }
                                     _hourlyWeather.value = Response.Success(weatherData)
@@ -137,9 +132,9 @@ class HomeViewModel(
                         } catch (ex: Exception) {
                             _hourlyWeather.value = Response.Failure(ex)
                         }
+
                         viewModelScope.launch(Dispatchers.IO) {
                             try {
-
                                 val (latitude, longitude) = getLocationCoordinates()
                                 val unit =
                                     settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
@@ -148,7 +143,7 @@ class HomeViewModel(
                                     latitude,
                                     longitude,
                                     unit,
-                                    "ar",
+                                    "en",
                                     Constants.API_KEY
                                 )
                                     .catch { ex -> _dailyWeather.value = Response.Failure(ex) }
@@ -156,7 +151,6 @@ class HomeViewModel(
                                         val weatherData = response.toFiveDaysWeather()
                                         val dailyAverages =
                                             calculateDailyAverages(weatherData.listOfDayWeather)
-                                        weatherData.lastUpdate = getCurrentDateTime()
                                         _dailyWeather.value = Response.Success(
                                             weatherData.copy(
                                                 listOfDayWeather = dailyAverages,
@@ -177,7 +171,6 @@ class HomeViewModel(
                         }
                     }
                 } else {
-                    //_toastEvent.emit("connection lost")
                     viewModelScope.launch(Dispatchers.IO) {
                         try {
                             weatherRepository.getHomeWeather().collect {
@@ -226,17 +219,14 @@ class HomeViewModel(
         return settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
     }
 
-    fun getDateTime() = DateUtils.getFormattedDateTime()
 
     fun startLocationUpdates() = locationRepository.startLocationUpdates()
 
-    fun stopLocationUpdates() = locationRepository.stopLocationUpdates()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun getCurrentDateTime(): String {
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
-        return current.format(formatter)
+        val calendar = Calendar.getInstance()
+        val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+        return formatter.format(calendar.time)
     }
 
 }

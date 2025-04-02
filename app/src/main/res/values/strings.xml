@@ -35,4 +35,6 @@
     <string name="time">Time</string>
     <string name="select_a_date">Select a Date</string>
     <string name="ok">OK</string>
+    <string name="check_you_re_internet_connection">Check You\'re Internet Connection</string>
+    <string name="error_while_loading_weather_data">Error while loading weather data</string>
 </resources>

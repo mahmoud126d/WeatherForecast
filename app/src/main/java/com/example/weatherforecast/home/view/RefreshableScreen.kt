@@ -1,6 +1,5 @@
 package com.example.weatherforecast.home.view
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,13 +15,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -49,8 +46,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,16 +53,13 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.LanguageHelper
 import com.example.weatherforecast.R
-import com.example.weatherforecast.model.CurrentWeather
-import com.example.weatherforecast.utils.DateUtils
+import com.example.weatherforecast.model.WeatherData
 import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.delay
 
 private const val TAG = "RefreshableScreen"
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +95,9 @@ fun RefreshableScreen(
 
             when (val dailyWeather = dailyWeatherState.value) {
                 is Response.Failure -> {
-                    Log.d(TAG, "Failure")
+                    item {
+                        Text(stringResource(R.string.error_while_loading_weather_data))
+                    }
                 }
 
                 is Response.Loading -> {
@@ -113,21 +107,22 @@ fun RefreshableScreen(
                 }
 
                 is Response.Success -> {
-                    val currentWeather = dailyWeather.data
-                    Log.d(TAG, "RefreshableScreen: ${currentWeather.lastUpdate}")
+                    val weatherData = dailyWeather.data
                     item {
                         WeatherInfoCard(
-                            currentWeather,
+                            weatherData,
                             contentDescription = "",
-                            formattedDateTime = LanguageChangeHelper.formatDateBasedOnLocale(currentWeather.lastUpdate),
+                            formattedDateTime = LanguageHelper.formatDateBasedOnLocale(
+                                weatherData.lastUpdate
+                            ),
                         )
                     }
                     item {
                         WeatherStateGrid(
-                            windSpeed = currentWeather.speed,
-                            clouds = currentWeather.cloud,
-                            pressure = currentWeather.pressure,
-                            humidity = currentWeather.humidity,
+                            windSpeed = weatherData.speed,
+                            clouds = weatherData.cloud,
+                            pressure = weatherData.pressure,
+                            humidity = weatherData.humidity,
                         )
                     }
 
@@ -135,7 +130,7 @@ fun RefreshableScreen(
                         WeatherPeriodBox(
                             stringResource(R.string.hourly_forecast),
                             painterResource(R.drawable.hour),
-                            currentWeather,
+                            weatherData,
                         )
                     }
 
@@ -143,7 +138,7 @@ fun RefreshableScreen(
                         WeatherPeriodBox(
                             stringResource(R.string.day_forecast),
                             painterResource(R.drawable.day),
-                            currentWeather,
+                            weatherData,
                         )
 
                     }
@@ -163,34 +158,10 @@ fun RefreshableScreen(
 
 }
 
-//@Preview(showSystemUi = true, device = Devices.PIXEL_4)
-@Composable
-fun WeatherInfoCardPreview(modifier: Modifier = Modifier) {
-    WeatherInfoCard(
-        currentWeather = CurrentWeather(
-            temperature = 25.0,
-            humidity = 12,
-            description = "Rain",
-            pressure = 123,
-            city = "Suez",
-            speed = 234.0,
-            cloud = 123,
-            date = "12/12",
-            icon = "",
-            address = "",
-            listOfHourlyWeather = emptyList(),
-            listOfDayWeather = emptyList(),
-            lastUpdate = "90/2"
-        ),
-        formattedDateTime = "",
-        contentDescription = ""
-    )
-}
-
 
 @Composable
 fun WeatherInfoCard(
-    currentWeather: CurrentWeather,
+    weatherData: WeatherData,
     formattedDateTime: String,
     contentDescription: String,
 ) {
@@ -201,7 +172,6 @@ fun WeatherInfoCard(
             .clip(RoundedCornerShape(bottomEnd = 24.dp, bottomStart = 24.dp))
     ) {
 
-        // Background Image
         Image(
             modifier = Modifier.fillMaxSize(),
             contentDescription = contentDescription,
@@ -209,14 +179,14 @@ fun WeatherInfoCard(
             contentScale = ContentScale.Crop
         )
         CompositionLocalProvider(LocalContentColor provides Color.White) {
-        Text(
-            text = "${LanguageChangeHelper.formatNumber(currentWeather.temperature.toInt())}${tempUnitSymbol}",
-            fontSize = 80.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize()
-        )
+            Text(
+                text = "${LanguageHelper.formatNumber(weatherData.temperature.toInt())}${tempUnitSymbol}",
+                fontSize = 80.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize()
+            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -225,12 +195,13 @@ fun WeatherInfoCard(
 
                 ) {
 
-                Row(modifier = Modifier.fillMaxWidth(),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
 
-                ) {
+                    ) {
                     Text(
-                        text = currentWeather.city,
+                        text = weatherData.city,
                         fontSize = 22.sp
                     )
                     Icon(
@@ -251,9 +222,9 @@ fun WeatherInfoCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Time Row
-                    Column (
+                    Column(
                         horizontalAlignment = Alignment.CenterHorizontally
-                    ){
+                    ) {
                         Text(
                             text = stringResource(R.string.last_update),
                         )
@@ -273,7 +244,7 @@ fun WeatherInfoCard(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = currentWeather.description,
+                            text = weatherData.description,
                             fontSize = 20.sp,
                         )
                     }
@@ -284,7 +255,6 @@ fun WeatherInfoCard(
 }
 
 
-//@Preview(showSystemUi = true)
 @Composable
 fun WeatherStateGrid(
     windSpeed: Double,
@@ -352,10 +322,10 @@ fun WeatherStateCard(
     contentDescription: String,
     title: String,
     value: Double,
-    unit:String,
+    unit: String,
     modifier: Modifier = Modifier,
 ) {
-    Box(//D0BCFF
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .height(65.dp)
@@ -375,7 +345,6 @@ fun WeatherStateCard(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Icon column
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -400,7 +369,6 @@ fun WeatherStateCard(
                     }
                 }
 
-                // Title and value column
                 Column(
                     modifier = Modifier
                         .weight(2f)
@@ -413,25 +381,22 @@ fun WeatherStateCard(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${LanguageChangeHelper.formatNumber(value.toInt())}$unit",
+                        text = "${LanguageHelper.formatNumber(value.toInt())}$unit",
 
                         )
                 }
-
-
             }
         }
     }
 }
 
-//@Preview(showSystemUi = true, device = Devices.PIXEL_4)
 @Composable
 fun WeatherPeriodBox(
     title: String,
     icon: Painter,
-    currentWeather: CurrentWeather,
+    weatherData: WeatherData,
 ) {
-    val title2 = stringResource(R.string.hourly_forecast)
+    val hourlyForecastString = stringResource(R.string.hourly_forecast)
     val layoutDirection = LocalLayoutDirection.current
     Box(
         modifier = Modifier
@@ -471,32 +436,32 @@ fun WeatherPeriodBox(
             LazyRow(
                 reverseLayout = layoutDirection == LayoutDirection.Rtl,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                ) {
-                if (title == title2) {
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (title == hourlyForecastString) {
                     val hourlyWeatherList = if (layoutDirection == LayoutDirection.Rtl) {
-                        currentWeather.listOfHourlyWeather.reversed()
+                        weatherData.listOfHourlyWeather.reversed()
                     } else {
-                        currentWeather.listOfHourlyWeather
+                        weatherData.listOfHourlyWeather
                     }
                     items(hourlyWeatherList.size) { index ->
                         HourlyWeatherColumn(
                             hourlyWeatherList[index].time,
                             painterResource(R.drawable.cloudandsun),
-                            "${LanguageChangeHelper.formatNumber(hourlyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
+                            "${LanguageHelper.formatNumber(hourlyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
                 } else {
                     val dailyWeatherList = if (layoutDirection == LayoutDirection.Rtl) {
-                        currentWeather.listOfDayWeather.reversed()
+                        weatherData.listOfDayWeather.reversed()
                     } else {
-                        currentWeather.listOfDayWeather
+                        weatherData.listOfDayWeather
                     }
                     items(dailyWeatherList.size) { index ->
                         HourlyWeatherColumn(
                             dailyWeatherList[index].time,
                             painterResource(R.drawable.cloudandsun),
-                            "${LanguageChangeHelper.formatNumber(dailyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
+                            "${LanguageHelper.formatNumber(dailyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
                 }
@@ -505,24 +470,22 @@ fun WeatherPeriodBox(
         }
     }
 }
-@Preview(showSystemUi = true, device = Devices.PIXEL_4)
-@Composable
-fun HourlyWeatherColumnPreview(modifier: Modifier = Modifier) {
-    HourlyWeatherColumn(
-        "12Am",
-        painterResource(R.drawable.cloudandsun),
-        "23C"
-    )
-}
+
 @Composable
 fun HourlyWeatherColumn(
     time: String,
     icon: Painter,
     temperature: String
 ) {
-    Box (
-        modifier = Modifier.clip(RoundedCornerShape(bottomEnd = 20.dp, topEnd = 20.dp, topStart = 20.dp))
-    ){
+    Box(
+        modifier = Modifier.clip(
+            RoundedCornerShape(
+                bottomEnd = 20.dp,
+                topEnd = 20.dp,
+                topStart = 20.dp
+            )
+        )
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -542,9 +505,9 @@ fun HourlyWeatherColumn(
 }
 
 @Composable
-fun LoadingAnimation(modifier: Modifier = Modifier
-    .fillMaxSize()
-    .wrapContentSize()) {
+fun LoadingAnimation(
+    modifier: Modifier = Modifier
+) {
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_animation))
     val animationState by animateLottieCompositionAsState(
         composition = composition,
@@ -553,12 +516,12 @@ fun LoadingAnimation(modifier: Modifier = Modifier
     LottieAnimation(
         composition = composition,
         progress = { animationState },
-        modifier = modifier
+        modifier = modifier.fillMaxSize().wrapContentSize()
     )
 
 }
 
-fun hPaToPercentage(hPa: Int): Double {
+private fun hPaToPercentage(hPa: Int): Double {
     val standardPressure = 1013.25
     return (hPa.toDouble() / standardPressure) * 100
 }

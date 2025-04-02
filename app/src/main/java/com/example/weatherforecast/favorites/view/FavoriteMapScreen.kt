@@ -9,10 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.weatherforecast.AndroidConnectivityObserver
-import com.example.weatherforecast.ConnectivityRepository
 import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.LanguageHelper
 import com.example.weatherforecast.LocationManager
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
@@ -21,7 +19,7 @@ import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModelFactory
 import com.example.weatherforecast.map.view.MapScreen
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
-import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
+import com.example.weatherforecast.repository.WeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
@@ -38,7 +36,7 @@ fun FavoriteMapScreen(
     val context = LocalContext.current
 
     val factory = FavoritesViewModelFactory(
-        CurrentWeatherRepositoryImpl.getInstance(
+        WeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
             WeatherLocalDataSourceImp(
                 WeatherDataBase.getInstance(context).getWeatherDao()
@@ -47,7 +45,7 @@ fun FavoriteMapScreen(
         LocationRepository(LocationManager(context)),
         SettingsRepository(
             DataStoreManager(context.applicationContext),
-            LanguageChangeHelper
+            LanguageHelper
         )
 
     )

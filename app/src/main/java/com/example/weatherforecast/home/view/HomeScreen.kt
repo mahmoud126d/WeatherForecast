@@ -9,37 +9,27 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.weatherforecast.AndroidConnectivityObserver
-import com.example.weatherforecast.ConnectivityRepository
-import com.example.weatherforecast.ConnectivityViewModel
 import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.LanguageHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
-import com.example.weatherforecast.favorites.view.favoritesViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModelFactory
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
-import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
+import com.example.weatherforecast.repository.WeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
-import kotlinx.coroutines.flow.first
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 private const val TAG = "HomeScreen"
 
@@ -51,33 +41,21 @@ lateinit var speedUnitSymbol: String
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
-    val locationManager = com.example.weatherforecast.LocationManager(context)
-
     val factory = HomeViewModelFactory(
-        CurrentWeatherRepositoryImpl.getInstance(
+        WeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
             WeatherLocalDataSourceImp(
                 WeatherDataBase.getInstance(context).getWeatherDao()
             )
         ),
-        LocationRepository(locationManager),
+        LocationRepository(com.example.weatherforecast.LocationManager(context)),
         SettingsRepository(
             DataStoreManager(context.applicationContext),
-            LanguageChangeHelper
+            LanguageHelper
         )
 
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
-    LaunchedEffect(Unit) {
-
-        homeViewModel.toastEvent.collect { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
-        }
-    }
-    LaunchedEffect(Unit) {
-        homeViewModel.getHomeDetails()
-    }
     LaunchedEffect(Unit) {
         if (checkPermissions(context)) {
             if (isLocationEnabled(context)) {
@@ -112,8 +90,13 @@ fun HomeScreen() {
                 speedUnitSymbol = ""
             }
         }
-    }
+        homeViewModel.getHomeDetails()
+        homeViewModel.toastEvent.collect { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
+        }
+    }
+    
     RefreshableScreen(
         currentWeatherState = homeViewModel.currentWeather.collectAsState(),
         hourlyWeatherState = homeViewModel.hourlyWeather.collectAsState(),
@@ -121,7 +104,8 @@ fun HomeScreen() {
         onRefresh = {
             homeViewModel.getHomeDetails()
             if (!homeViewModel.isOnline()) {
-                Toast.makeText(context, "You are offline", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.check_you_re_internet_connection), Toast.LENGTH_SHORT).show()
             }
         },
     )

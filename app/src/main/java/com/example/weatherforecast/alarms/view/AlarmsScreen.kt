@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +23,6 @@ import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.rememberDismissState
@@ -64,9 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageChangeHelper
+import com.example.weatherforecast.LanguageHelper
 import com.example.weatherforecast.LocationManager
-import com.example.weatherforecast.NotificationScheduler
 import com.example.weatherforecast.R
 import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModel
 import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModelFactory
@@ -75,7 +72,7 @@ import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.model.AlertData
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
-import com.example.weatherforecast.repository.CurrentWeatherRepositoryImpl
+import com.example.weatherforecast.repository.WeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.launch
@@ -92,7 +89,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val factory = AlarmsViewModelFactory(
-        CurrentWeatherRepositoryImpl.getInstance(
+        WeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
             WeatherLocalDataSourceImp(
                 WeatherDataBase.getInstance(context).getWeatherDao()
@@ -100,7 +97,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
         ),
         LocationRepository(LocationManager(context)),
         application,
-        CurrentWeatherRepositoryImpl.getInstance(
+        WeatherRepositoryImpl.getInstance(
             CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
             WeatherLocalDataSourceImp(
                 WeatherDataBase.getInstance(context).getWeatherDao()
@@ -108,7 +105,7 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
         ),
         SettingsRepository(
             DataStoreManager(context.applicationContext),
-            LanguageChangeHelper
+            LanguageHelper
         )
     )
     alarmsViewModel = viewModel(factory = factory)

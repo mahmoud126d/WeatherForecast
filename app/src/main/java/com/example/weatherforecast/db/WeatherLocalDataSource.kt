@@ -1,15 +1,15 @@
 package com.example.weatherforecast.db
 
 import com.example.weatherforecast.model.AlertData
-import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.WeatherData
 import com.example.weatherforecast.model.HomeWeather
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherLocalDataSource {
-    suspend fun insertWeather(weather: CurrentWeather):Long
-    suspend fun deleteWeather(weather: CurrentWeather):Int
-    suspend fun getAllWeather(): Flow<List<CurrentWeather>>?
-    suspend fun getWeather(lon: Double, lat: Double): Flow<CurrentWeather?>
+    suspend fun insertWeather(weather: WeatherData):Long
+    suspend fun deleteWeather(weather: WeatherData):Int
+    suspend fun getAllWeather(): Flow<List<WeatherData>>?
+    suspend fun getWeather(lon: Double, lat: Double): Flow<WeatherData?>
     suspend fun insertAlert(alert:AlertData):Long
     suspend fun getAllAlerts(): Flow<List<AlertData>>?
     suspend fun deleteAlert(date: String, time: String):Int

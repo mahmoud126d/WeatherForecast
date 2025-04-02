@@ -1,7 +1,7 @@
 package com.example.weatherforecast.network
 
-import com.example.weatherforecast.model.CurrentWeatherResponse
-import com.example.weatherforecast.model.FiveDaysWeatherResponse
+import com.example.weatherforecast.model.WeatherResponse
+import com.example.weatherforecast.model.ForecastWeatherResponse
 import kotlinx.coroutines.flow.Flow
 
 interface CurrentWeatherRemoteDataSource {
@@ -11,12 +11,12 @@ interface CurrentWeatherRemoteDataSource {
         unit:String,
         lang:String,
         appId:String,
-    ): Flow<CurrentWeatherResponse>
+    ): Flow<WeatherResponse>
     suspend fun getFiveDaysWeather(
         lat: Double,
         lon: Double,
         unit:String,
         lang:String,
         appId:String,
-    ): Flow<FiveDaysWeatherResponse>
+    ): Flow<ForecastWeatherResponse>
 }

@@ -6,14 +6,12 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.AndroidConnectivityObserver
-import com.example.weatherforecast.home.viewmodel.HomeViewModel
-import com.example.weatherforecast.home.viewmodel.HomeViewModel.Companion
-import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.WeatherData
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
 import com.example.weatherforecast.model.toHourlyWeather
-import com.example.weatherforecast.repository.CurrentWeatherRepository
+import com.example.weatherforecast.repository.WeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.utils.Constants
@@ -34,7 +32,7 @@ import java.util.Locale
 import java.util.Stack
 
 class FavoritesViewModel(
-    private val weatherRepository: CurrentWeatherRepository,
+    private val weatherRepository: WeatherRepository,
     private var locationRepo: LocationRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -46,7 +44,7 @@ class FavoritesViewModel(
         private const val MAX_HOURLY_FORECASTS = 8
     }
 
-    private val _weatherFavoriteList = MutableStateFlow<List<CurrentWeather>>(emptyList())
+    private val _weatherFavoriteList = MutableStateFlow<List<WeatherData>>(emptyList())
     val productFavoriteList = _weatherFavoriteList.asStateFlow()
 
     private val _toastEvent = MutableSharedFlow<String>()
@@ -66,12 +64,12 @@ class FavoritesViewModel(
     val dailyWeather: StateFlow<Response> = _dailyWeather.asStateFlow()
 
 
-    private val deletedWeatherStack = Stack<CurrentWeather>()
+    private val deletedWeatherStack = Stack<WeatherData>()
 
 
     val cityName: StateFlow<String?> = locationRepo.cityNameFlow
 
-    private var lastDeleted: CurrentWeather? = null
+    private var lastDeleted: WeatherData? = null
 
     private var isOnline = false
 
@@ -101,13 +99,13 @@ class FavoritesViewModel(
     fun getAllFavorites() {
         viewModelScope.launch(Dispatchers.IO) {
             weatherRepository.getAllWeather()?.collect {
-                val list: List<CurrentWeather> = it
+                val list: List<WeatherData> = it
                 _weatherFavoriteList.value = list
             }
         }
     }
 
-    fun deleteFromFavorite(weather: CurrentWeather) {
+    fun deleteFromFavorite(weather: WeatherData) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 if (weatherRepository.deleteWeather(weather) > 0) {
@@ -134,7 +132,7 @@ class FavoritesViewModel(
         }
     }
 
-    private fun saveWeather(weather: CurrentWeather) {
+    private fun saveWeather(weather: WeatherData) {
         Log.d(TAG, "saveWeather: ")
         viewModelScope.launch(Dispatchers.IO) {
             val cityName = locationRepo.cityNameFlow.first() ?: "No City Name"
@@ -247,12 +245,12 @@ class FavoritesViewModel(
             viewModelScope.launch(Dispatchers.IO) {
                 weatherRepository.getWeather(longitude, latitude).collect {
                     Log.d(TAG, "getWeather: long : ${longitude} lat : $latitude")
-                    val currentWeather: CurrentWeather? = it
-                    if (currentWeather != null) {
+                    val weatherData: WeatherData? = it
+                    if (weatherData != null) {
                         Log.d(TAG, "getWeather: not null")
-                        _currentWeather.value = Response.Success(currentWeather)
-                        _hourlyWeather.value = Response.Success(currentWeather)
-                        _dailyWeather.value = Response.Success(currentWeather)
+                        _currentWeather.value = Response.Success(weatherData)
+                        _hourlyWeather.value = Response.Success(weatherData)
+                        _dailyWeather.value = Response.Success(weatherData)
                     }
                 }
             }

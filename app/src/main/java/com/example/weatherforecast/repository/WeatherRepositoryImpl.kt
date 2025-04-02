@@ -2,24 +2,24 @@ package com.example.weatherforecast.repository
 
 import com.example.weatherforecast.db.WeatherLocalDataSource
 import com.example.weatherforecast.model.AlertData
-import com.example.weatherforecast.model.CurrentWeather
-import com.example.weatherforecast.model.CurrentWeatherResponse
-import com.example.weatherforecast.model.FiveDaysWeatherResponse
+import com.example.weatherforecast.model.WeatherData
+import com.example.weatherforecast.model.WeatherResponse
+import com.example.weatherforecast.model.ForecastWeatherResponse
 import com.example.weatherforecast.model.HomeWeather
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 
-class CurrentWeatherRepositoryImpl private constructor(
+class WeatherRepositoryImpl private constructor(
     private val currentWeatherRemoteRepository: CurrentWeatherRemoteDataSource,
     private val weatherLocalDataSource: WeatherLocalDataSource
-) : CurrentWeatherRepository {
+) : WeatherRepository {
     override suspend fun getCurrentWeather(
         lat: Double,
         lon: Double,
         unit:String,
         lang:String,
         appId:String,
-    ): Flow<CurrentWeatherResponse> {
+    ): Flow<WeatherResponse> {
         return currentWeatherRemoteRepository.getCurrentWeather(
             lat ,
             lon ,
@@ -35,7 +35,7 @@ class CurrentWeatherRepositoryImpl private constructor(
         unit:String,
         lang:String,
         appId:String,
-    ): Flow<FiveDaysWeatherResponse> {
+    ): Flow<ForecastWeatherResponse> {
         return currentWeatherRemoteRepository.getFiveDaysWeather(
             lat ,
             lon ,
@@ -45,12 +45,12 @@ class CurrentWeatherRepositoryImpl private constructor(
         )
     }
 
-    override suspend fun insertWeather(weather: CurrentWeather) = weatherLocalDataSource.insertWeather(weather)
+    override suspend fun insertWeather(weather: WeatherData) = weatherLocalDataSource.insertWeather(weather)
 
-    override suspend fun deleteWeather(weather: CurrentWeather) = weatherLocalDataSource.deleteWeather(weather)
+    override suspend fun deleteWeather(weather: WeatherData) = weatherLocalDataSource.deleteWeather(weather)
 
-    override suspend fun getAllWeather(): Flow<List<CurrentWeather>>? = weatherLocalDataSource.getAllWeather()
-    override suspend fun getWeather(lon: Double, lat: Double): Flow<CurrentWeather?> =weatherLocalDataSource.getWeather(lon,lat)
+    override suspend fun getAllWeather(): Flow<List<WeatherData>>? = weatherLocalDataSource.getAllWeather()
+    override suspend fun getWeather(lon: Double, lat: Double): Flow<WeatherData?> =weatherLocalDataSource.getWeather(lon,lat)
     override suspend fun insertAlert(alertData: AlertData) = weatherLocalDataSource.insertAlert(alertData)
     override suspend fun getAllAlerts(): Flow<List<AlertData>>? {
         return weatherLocalDataSource.getAllAlerts()
@@ -78,13 +78,13 @@ class CurrentWeatherRepositoryImpl private constructor(
     }
 
     companion object {
-        private var INSTANCE: CurrentWeatherRepositoryImpl? = null
+        private var INSTANCE: WeatherRepositoryImpl? = null
         fun getInstance(
             currentWeatherRemoteRepository: CurrentWeatherRemoteDataSource,
             weatherLocalDataSource: WeatherLocalDataSource
-        ): CurrentWeatherRepositoryImpl {
+        ): WeatherRepositoryImpl {
             return INSTANCE ?: synchronized(this) {
-                val temp = CurrentWeatherRepositoryImpl(currentWeatherRemoteRepository,weatherLocalDataSource)
+                val temp = WeatherRepositoryImpl(currentWeatherRemoteRepository,weatherLocalDataSource)
                 INSTANCE = temp
                 temp
             }

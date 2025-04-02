@@ -3,11 +3,9 @@ package com.example.weatherforecast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material.icons.filled.Warning
 import com.example.weatherforecast.utils.Constants
 
 

@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.weatherforecast.model.AlertData
-import com.example.weatherforecast.model.CurrentWeather
+import com.example.weatherforecast.model.WeatherData
 import com.example.weatherforecast.model.HomeWeather
 import kotlinx.coroutines.flow.Flow
 
@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.Flow
 interface WeatherDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWeather(weather: CurrentWeather):Long
+    suspend fun insertWeather(weather: WeatherData):Long
 
     @Delete
-    suspend fun deleteWeather(weather: CurrentWeather):Int
+    suspend fun deleteWeather(weather: WeatherData):Int
 
-    @Query("SELECT * FROM CurrentWeather")
-    fun getAllWeather():Flow<List<CurrentWeather>>
+    @Query("SELECT * FROM WeatherData")
+    fun getAllWeather():Flow<List<WeatherData>>
 
-    @Query("SELECT * FROM CurrentWeather WHERE lat = :latitude AND lon = :longitude LIMIT 1")
-    fun getWeatherLatLon( longitude: Double,latitude: Double): Flow<CurrentWeather?>
+    @Query("SELECT * FROM WeatherData WHERE lat = :latitude AND lon = :longitude LIMIT 1")
+    fun getWeatherLatLon( longitude: Double,latitude: Double): Flow<WeatherData?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlert(alertData: AlertData):Long

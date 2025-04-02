@@ -10,7 +10,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-object LanguageChangeHelper {
+object LanguageHelper {
     fun changeLanguage(  context: Context,languageCode: String) {
         //version >= 13
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

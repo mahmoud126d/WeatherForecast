@@ -1,7 +1,6 @@
 package com.example.weatherforecast.network
-import com.example.weatherforecast.model.CurrentWeatherResponse
-import com.example.weatherforecast.model.FiveDaysWeatherResponse
-import kotlinx.coroutines.flow.Flow
+import com.example.weatherforecast.model.WeatherResponse
+import com.example.weatherforecast.model.ForecastWeatherResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -15,7 +14,7 @@ interface CurrentWeatherApiService {
         @Query("lang") lang:String,
         @Query("appid") appId:String,
 
-    ): Response<CurrentWeatherResponse>
+    ): Response<WeatherResponse>
     @GET("data/2.5/forecast")
     suspend fun getFiveDaysWeather(
         @Query("lat") lat:Double,
@@ -23,6 +22,6 @@ interface CurrentWeatherApiService {
         @Query("units") unit:String,
         @Query("lang") lang:String,
         @Query("appid") appId:String,
-    ):Response<FiveDaysWeatherResponse>
+    ):Response<ForecastWeatherResponse>
 
 }

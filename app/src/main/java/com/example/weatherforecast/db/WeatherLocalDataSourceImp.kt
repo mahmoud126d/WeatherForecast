@@ -35,8 +35,8 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
     }
 
 
-    override suspend fun deleteOldAlerts(currentTime: Long): Int {
-        return dao.deleteOldAlerts(currentTime)
+    override suspend fun deleteOldAlerts(): Int {
+        return dao.deleteOldAlerts()
     }
 
     override suspend fun insertHomeWeather(weather: HomeWeather): Long {

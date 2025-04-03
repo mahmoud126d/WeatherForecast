@@ -205,17 +205,31 @@ class HomeViewModel(
     }
 
     private fun calculateDailyAverages(weatherList: List<DayWeather>): List<DayWeather> {
-        val groupedByDay = weatherList.groupBy { DateUtils.extractDay(it.time) }
-        return groupedByDay.map { (day, readings) ->
-            DayWeather(
-                temp = readings.map { it.temp }.average(),
-                icon = readings.groupingBy { it.icon }.eachCount()
-                    .maxByOrNull { it.value }?.key
-                    ?: "",
-                time = day
-            )
+        val groupedByDay = weatherList.groupBy {
+            it.time.split(" ")[0]
         }
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dayNameFormat = SimpleDateFormat("EEE", Locale.getDefault())
+
+        return groupedByDay.entries
+            .sortedBy { (dateString, _) ->
+                dateFormat.parse(dateString)
+            }
+            .take(5)
+            .map { (dateString, readings) ->
+                val date = dateFormat.parse(dateString)
+                val dayName = dayNameFormat.format(date)
+
+                DayWeather(
+                    temp = readings.map { it.temp }.average(),
+                    icon = readings.groupingBy { it.icon }.eachCount()
+                        .maxByOrNull { it.value }?.key ?: "",
+                    time = dayName
+                )
+            }
     }
+
 
     suspend fun getTemperatureUnit(): String {
         return settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT

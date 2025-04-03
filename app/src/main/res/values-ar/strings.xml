@@ -5,8 +5,8 @@
     <string name="clouds">الغيوم</string>
     <string name="pressure">الضغط</string>
     <string name="humidity">الرطوبة</string>
-    <string name="hourly_forecast">التوقعات لكل ساعة</string>
-    <string name="day_forecast">توقعات اليوم</string>
+    <string name="today_forecast">توقعات اليوم</string>
+    <string name="daily_forecast">توقعات الايام المقبلة</string>
     <string name="language">اللغة</string>
     <string name="unit_systems">وحده درجة الحرارة</string>
     <string name="ar">العربية</string>
@@ -24,4 +24,20 @@
     <string name="m_s">م/ث</string>
     <string name="mph">ميل/ساعه</string>
     <string name="last_update">اخر تحديث</string>
+    <string name="select_date">حدد التاريخ</string>
+    <string name="select_time">حدد الوقت</string>
+    <string name="cancel">الغاء</string>
+    <string name="save">حفظ</string>
+    <string name="no_alerts_set_tap_to_add_a_weather_alert">لم يتم تعيين أي تنبيهات. اضغط على + لإضافة تنبيه للطقس.</string>
+    <string name="date">التاريخ</string>
+    <string name="time">الوقت</string>
+    <string name="select_a_date">اختر تاريخاً</string>
+    <string name="ok">موافق</string>
+    <string name="check_you_re_internet_connection">تحقق من اتصالك بالإنترنت</string>
+    <string name="error_while_loading_weather_data">خطأ أثناء تحميل بيانات الطقس</string>
+    <string name="gps">جي بي إس</string>
+    <string name="map">خريطة</string>
+    <string name="location_select">اختيار الموقع</string>
+
+
 </resources>

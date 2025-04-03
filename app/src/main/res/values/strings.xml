@@ -4,8 +4,8 @@
     <string name="clouds">Clouds</string>
     <string name="pressure">Pressure</string>
     <string name="humidity">Humidity</string>
-    <string name="hourly_forecast">Hourly forecast</string>
-    <string name="day_forecast">Day forecast</string>
+    <string name="today_forecast">Today\'s forecast</string>
+    <string name="daily_forecast">Daily forecast</string>
     <string name="language">Language</string>
     <string name="unit_systems">Unit Systems</string>
     <string name="ar">Arabic</string>
@@ -37,4 +37,11 @@
     <string name="ok">OK</string>
     <string name="check_you_re_internet_connection">Check You\'re Internet Connection</string>
     <string name="error_while_loading_weather_data">Error while loading weather data</string>
+    <string name="pm">PM</string>
+    <string name="delete">Delete</string>
+    <string name="am">AM</string>
+    <string name="check_your_internet_connection">Check Your Internet Connection</string>
+    <string name="weather_notification">Weather Notification</string>
+    <string name="see_full_forecast">%1$s . See Full forecast</string>
+    <string name="selected_time_is_in_the_past">Selected time is in the past!</string>
 </resources>

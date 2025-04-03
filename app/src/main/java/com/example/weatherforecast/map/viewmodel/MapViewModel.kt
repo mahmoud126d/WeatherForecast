@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
-import com.example.weatherforecast.utils.InternetConnection
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 

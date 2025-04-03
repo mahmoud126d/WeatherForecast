@@ -58,11 +58,7 @@ fun FavoriteMapScreen(
         navController = navController,
         buttonText = "Set Home Location",
         onButtonClick = { latitude, longitude ->
-            Log.d("ProfileScreen", "Selected Location: Lat $latitude, Lng $longitude")
-
             favoritesViewModel.getWeather(longitude,latitude)
-
-            // Navigate to home screen
             navController.navigate(Constants.FAVORITES_SCREEN)
         }
     )

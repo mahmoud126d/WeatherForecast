@@ -14,21 +14,24 @@ import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.Stack
 import java.util.TimeZone
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
-class AlarmsViewModel(
-    private var repo: WeatherRepository,
+class AlertViewModel(
     private var locationRepo : LocationRepository,
     private val application: Application,
     private val weatherRepository: WeatherRepository,
@@ -38,6 +41,10 @@ class AlarmsViewModel(
     private val _alertList = MutableStateFlow<List<AlertData>>(emptyList())
     val alertList = _alertList.asStateFlow()
 
+    private val deletedAlertStack = Stack<AlertData>()
+
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent = _toastEvent.asSharedFlow()
 
     init {
         getAlerts()
@@ -46,7 +53,7 @@ class AlarmsViewModel(
 
     private fun getAlerts(){
         viewModelScope.launch(Dispatchers.IO) {
-            repo.getAllAlerts()?.collect{
+            weatherRepository.getAllAlerts()?.collect{
                 val list :List<AlertData> = it
                 _alertList.value = list
             }
@@ -60,15 +67,15 @@ fun scheduleNotification(alert: AlertData) {
         } else {
             Pair(alert.lat, alert.long)
         }
-        Log.d("TAG", "scheduleNotification: lat $latitude long $longitude")
         val delay = timeToMillis(
             targetDate = alert.date,
             targetTime = alert.time,
         )
-
         val data = workDataOf(
             "KEY_LONG" to longitude,
             "KEY_LAT" to latitude,
+            "KEY_DATE" to alert.date,
+            "KEY_TIME" to alert.time
         )
 
         val myWorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
@@ -78,26 +85,32 @@ fun scheduleNotification(alert: AlertData) {
 
         WorkManager.getInstance(application).enqueue(myWorkRequest)
 
-        weatherRepository.insertAlert(alert.copy(workId = myWorkRequest.id.toString(), lat = latitude, long = longitude))
+        weatherRepository.insertAlert(alert.copy(workId = myWorkRequest.id.toString(), lat = latitude, long = longitude, timestamp = convertDateTimeToTimeStamp(alert.date,alert.time)))
     }
 }
 
-    fun cancelNotification( date: String, time: String) {
+    fun cancelNotification(date: String, time: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val workIdString = weatherRepository.getWorkId(date, time)
             workIdString?.let {
                 val workId = UUID.fromString(it)
                 WorkManager.getInstance(application).cancelWorkById(workId)
                 weatherRepository.deleteAlert(date, time)
+
+                val alertToDelete = _alertList.value.find { it.date == date && it.time == time }
+                alertToDelete?.let {
+                    deletedAlertStack.push(it)
+                }
+
+                _toastEvent.emit("deleted from Favorite")
             }
         }
     }
+
     private suspend fun getLocationCoordinates(): Pair<Double, Double> {
         val locationSelection = settingsRepository.locationSelection.first()
         return if (locationSelection == "gps") {
-            Log.d("TAG", "before getLocationCoordinates:")
             val location = locationRepo.locationFlow.filterNotNull().first()
-            Log.d("TAG", "getLocationCoordinates: ${location.latitude}")
             Pair(location.latitude, location.longitude)
         } else {
             val longitude = settingsRepository.longFlow.first() ?: 0.0
@@ -119,4 +132,23 @@ fun scheduleNotification(alert: AlertData) {
             0L
         }
     }
+    fun undoDelete() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (deletedAlertStack.isNotEmpty()) {
+                val lastDeleted = deletedAlertStack.pop()
+                weatherRepository.insertAlert(lastDeleted)
+            }
+        }
+    }
+
+    private fun convertDateTimeToTimeStamp(date:String,time:String):Long{
+        val dateStr = "$date $time"
+        val format = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.ENGLISH)
+        format.timeZone = TimeZone.getTimeZone("UTC")
+
+        val date: Date = format.parse(dateStr)
+        val timestamp: Long = date.time / 1000
+        return timestamp
+    }
+    
 }

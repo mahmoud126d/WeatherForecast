@@ -7,14 +7,6 @@ import java.util.Locale
 
 object DateUtils {
 
-
-    fun getFormattedDateTime(): String {
-        val sdf = SimpleDateFormat("MMMM dd, HH:mm", Locale.getDefault())
-        return sdf.format(Date())
-    }
-    fun getFormattedDateTime(pattern:String): String {
-        return SimpleDateFormat(pattern, Locale.getDefault()).format(Date())
-    }
     fun extractTime(dateTime: String): String {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val outputFormat = SimpleDateFormat("h a", Locale.getDefault())

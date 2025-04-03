@@ -64,6 +64,8 @@ import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModel
 import com.example.weatherforecast.favorites.viewmodel.FavoritesViewModelFactory
 import com.example.weatherforecast.home.view.RefreshableScreen
+import com.example.weatherforecast.home.view.speedUnitSymbol
+import com.example.weatherforecast.home.view.tempUnitSymbol
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.WeatherRepositoryImpl
@@ -73,16 +75,12 @@ import com.example.weatherforecast.utils.Constants
 import kotlinx.coroutines.launch
 
 lateinit var favoritesViewModel: FavoritesViewModel
-private const val TAG = "FavoritesScreen"
-lateinit var tempUnitSymbol: String
-lateinit var speedUnitSymbol: String
 
 @Composable
 fun FavoritesScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
-    Log.d(TAG, "FavoritesScreen: ")
     val context = LocalContext.current
 
     val factory = FavoritesViewModelFactory(
@@ -92,8 +90,8 @@ fun FavoritesScreen(
                 WeatherDataBase.getInstance(context).getWeatherDao()
             ),
 
-        ),
-       LocationRepository(LocationManager(context)),
+            ),
+        LocationRepository(LocationManager(context)),
         SettingsRepository(
             DataStoreManager(context.applicationContext),
             LanguageHelper
@@ -102,6 +100,23 @@ fun FavoritesScreen(
     )
     favoritesViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
+        val unit = favoritesViewModel.getTemperatureUnit()
+        when (unit) {
+            "metric" -> {
+                tempUnitSymbol = context.getString(R.string.c)
+                speedUnitSymbol = context.getString(R.string.m_s)
+            }
+
+            "imperial" -> {
+                tempUnitSymbol = context.getString(R.string.f)
+                speedUnitSymbol = context.getString(R.string.mph)
+            }
+
+            else -> {
+                tempUnitSymbol = context.getString(R.string.k)
+                speedUnitSymbol = ""
+            }
+        }
         favoritesViewModel.getAllFavorites()
 
     }
@@ -119,7 +134,7 @@ fun FavoritesScreen(
                 },
                 containerColor = colorResource(R.color.purple_500),
             ) {
-                Icon(Icons.Default.Favorite, contentDescription = "Add",tint = Color.White)
+                Icon(Icons.Default.Favorite, contentDescription = "Add", tint = Color.White)
             }
         },
         floatingActionButtonPosition = FabPosition.End
@@ -155,18 +170,18 @@ fun FavoritesScreen(
 
                 }
             }
-            LaunchedEffect(Unit) {
-                favoritesViewModel.getAllFavorites()
-                favoritesViewModel.internetToastEvent.collect { message ->
-                    coroutineScope.launch {
-                         snackbarHostState.showSnackbar(
-                            message = message,
-                            duration = SnackbarDuration.Short,
-                        )
-                    }
-
-                }
-            }
+//            LaunchedEffect(Unit) {
+//                favoritesViewModel.getAllFavorites()
+//                favoritesViewModel.internetToastEvent.collect { message ->
+//                    coroutineScope.launch {
+//                        snackbarHostState.showSnackbar(
+//                            message = message,
+//                            duration = SnackbarDuration.Short,
+//                        )
+//                    }
+//
+//                }
+//            }
         }
     }
 }
@@ -187,7 +202,7 @@ fun FavoriteColumn(
         ) {
             Text("No favorites set. Tap + to add a weather alert.")
         }
-    }else{
+    } else {
         LazyColumn(
             modifier = modifier
                 .fillMaxWidth()
@@ -230,12 +245,12 @@ fun FavoriteColumn(
                         }
                     },
                     dismissContent = {
-                        item?.country?.let {
+                        item.country?.let {
                             WeatherItem(
                                 country = it,
                                 fullAddress = item.city,
                                 navigate = {
-                                    favoritesViewModel.getWeather(item.lon,item.lat)
+                                    favoritesViewModel.getWeather(item.lon, item.lat)
                                     navController.navigate(Constants.FAVORITE_WEATHER_SCREEN)
                                 }
                             )
@@ -309,9 +324,5 @@ fun FavoriteWeatherScreen(modifier: Modifier = Modifier) {
                 Toast.makeText(context, "You are offline", Toast.LENGTH_SHORT).show()
             }
         },
-    )
-    Log.d(
-        "FavoritesViewModTAGel",
-        "getCurrentWeather: ${favoritesViewModel.currentWeather.collectAsState().value}"
     )
 }

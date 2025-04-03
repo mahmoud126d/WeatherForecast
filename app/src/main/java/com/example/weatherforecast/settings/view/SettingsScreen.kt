@@ -50,17 +50,8 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController) {
     val context = LocalContext.current
-    // Create the repository using DataStoreManager
-    val repository =
-        SettingsRepository(DataStoreManager(context.applicationContext), LanguageHelper)
-    // Create a ViewModelFactory that takes the repository as a dependency
-    val factory = SettingsViewModelFactory(repository)
-
-    // Obtain the SettingsViewModel via the viewModel() composable function
+    val factory = SettingsViewModelFactory(SettingsRepository(DataStoreManager(context.applicationContext), LanguageHelper))
     val settingsViewModel: SettingsViewModel = viewModel(factory = factory)
-
-
-    // Wrap the entire Column in a Scrollable Modifier
     Column(
         modifier = modifier
             .fillMaxSize()

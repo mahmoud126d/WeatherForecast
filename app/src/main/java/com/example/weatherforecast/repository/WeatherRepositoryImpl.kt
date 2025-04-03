@@ -61,8 +61,8 @@ class WeatherRepositoryImpl private constructor(
     }
 
 
-    override suspend fun deleteOldAlerts(currentTime: Long): Int {
-        return weatherLocalDataSource.deleteOldAlerts(currentTime)
+    override suspend fun deleteOldAlerts(): Int {
+        return weatherLocalDataSource.deleteOldAlerts()
     }
 
     override suspend fun insertHomeWeather(weather: HomeWeather): Long {

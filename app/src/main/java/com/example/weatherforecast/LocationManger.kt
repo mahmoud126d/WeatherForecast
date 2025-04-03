@@ -52,9 +52,6 @@ class LocationManager(context: Context) {
         fusedClient.removeLocationUpdates(locationCallback)
     }
 
-
-
-
     fun getCityNameFromLocation(latitude: Double, longitude: Double) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -62,17 +59,15 @@ class LocationManager(context: Context) {
                     val address = addresses.getOrNull(0)
                     val city = address?.subAdminArea
                     _cityNameFlow.value = city ?: "Unknown City"
-                    Log.d("LocationManager", "City Name: ${address}")
                 }
             } else {
                 val addresses = geocoder.getFromLocation(latitude, longitude, 1)
                 val address = addresses?.getOrNull(0)
                 val city = address?.subAdminArea
                 _cityNameFlow.value = city ?: "Unknown City"
-                Log.d("LocationManager", "City Name: $city")
             }
         } catch (e: IOException) {
-            Log.e("LocationManager", "Geocoder failed: ${e.message}")
+            e.printStackTrace()
         }
     }
 

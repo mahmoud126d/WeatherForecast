@@ -2,6 +2,7 @@ package com.example.weatherforecast.home.view
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -27,9 +31,9 @@ import com.example.weatherforecast.home.viewmodel.HomeViewModel
 import com.example.weatherforecast.home.viewmodel.HomeViewModelFactory
 import com.example.weatherforecast.network.CurrentWeatherRemoteDataSourceImpl
 import com.example.weatherforecast.network.RetrofitHelper
-import com.example.weatherforecast.repository.WeatherRepositoryImpl
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
+import com.example.weatherforecast.repository.WeatherRepositoryImpl
 
 private const val TAG = "HomeScreen"
 
@@ -57,6 +61,7 @@ fun HomeScreen() {
     )
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
     LaunchedEffect(Unit) {
+        homeViewModel.getHomeDetails()
         if (checkPermissions(context)) {
             if (isLocationEnabled(context)) {
                 homeViewModel.startLocationUpdates()

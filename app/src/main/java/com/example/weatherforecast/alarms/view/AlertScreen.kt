@@ -3,6 +3,8 @@ package com.example.weatherforecast.alarms.view
 import android.annotation.SuppressLint
 import android.app.Application
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +40,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -45,6 +51,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,13 +67,16 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherforecast.DataStoreManager
 import com.example.weatherforecast.LanguageHelper
 import com.example.weatherforecast.LocationManager
+import android.Manifest
+import android.widget.Toast
 import com.example.weatherforecast.R
-import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModel
-import com.example.weatherforecast.alarms.viewmodel.AlarmsViewModelFactory
+import com.example.weatherforecast.alarms.viewmodel.AlertViewModel
+import com.example.weatherforecast.alarms.viewmodel.AlertViewModelFactory
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.model.AlertData
@@ -77,24 +87,22 @@ import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-private lateinit var alarmsViewModel: AlarmsViewModel
+private lateinit var alertViewModel: AlertViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AlarmsScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
-    val factory = AlarmsViewModelFactory(
-        WeatherRepositoryImpl.getInstance(
-            CurrentWeatherRemoteDataSourceImpl(RetrofitHelper.retrofitService),
-            WeatherLocalDataSourceImp(
-                WeatherDataBase.getInstance(context).getWeatherDao()
-            )
-        ),
+    val factory = AlertViewModelFactory(
         LocationRepository(LocationManager(context)),
         application,
         WeatherRepositoryImpl.getInstance(
@@ -108,19 +116,60 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
             LanguageHelper
         )
     )
-    alarmsViewModel = viewModel(factory = factory)
+    alertViewModel = viewModel(factory = factory)
 
-    val alertList = alarmsViewModel.alertList.collectAsState()
+    val alertList = alertViewModel.alertList.collectAsState()
     var isBottomSheetVisible by remember { mutableStateOf(false) }
 
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) {
+        alertViewModel.toastEvent.collect { message ->
+            coroutineScope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = message,
+                    duration = SnackbarDuration.Short,
+                    actionLabel = "Undo"
+                )
+                when (result) {
+                    SnackbarResult.ActionPerformed -> {
+                        alertViewModel.undoDelete()
+                    }
+
+                    SnackbarResult.Dismissed -> {
+
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+       onResult = {
+
+       }
+    )
+
+    val onFabClick = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val notificationManager = NotificationManagerCompat.from(context)
+            val hasPermission = notificationManager.areNotificationsEnabled()
+            if (!hasPermission) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        isBottomSheetVisible = true
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = colorResource(id = R.color.background_color),
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    // Fixed: Added onClick handler to show bottom sheet
-                    isBottomSheetVisible = true
-                },
+                onClick = { onFabClick() },
                 containerColor = colorResource(R.color.purple_500),
                 contentColor = Color.White
             ) {
@@ -146,10 +195,10 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
                     Text(stringResource(R.string.no_alerts_set_tap_to_add_a_weather_alert))
                 }
             } else {
-                AlertColumn(
-                    alerts = alertList.value
-                )
+                // Display your alert list here
+                AlertColumn(alerts = alertList.value)
             }
+            // BottomSheet visibility logic
             BottomSheet(
                 isVisible = isBottomSheetVisible,
                 onDismiss = { isBottomSheetVisible = false }
@@ -170,26 +219,22 @@ fun BottomSheet(
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
-    // State to control the visibility of the date picker dialog
     var showDatePicker by remember { mutableStateOf(false) }
 
-    // State to store the selected date
     var selectedDate by remember { mutableStateOf("") }
 
-    // States for date and time pickers
     var showTimePicker by remember { mutableStateOf(false) }
 
-    // States to store selected date and time
     var selectedTime by remember { mutableStateOf("") }
 
-    // Time picker state
+    val context = LocalContext.current
+
     val timePickerState = rememberTimePickerState(
         initialHour = 12,
         initialMinute = 0,
         is24Hour = false
     )
 
-    // Get today's date in milliseconds
     val today = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
         set(Calendar.MINUTE, 0)
@@ -197,13 +242,10 @@ fun BottomSheet(
         set(Calendar.MILLISECOND, 0)
     }.timeInMillis
 
-    val context = LocalContext.current
 
-    // Date picker state with start date set to today
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = today + 86400000,
         selectableDates = object : SelectableDates {
-            // Override to only allow dates from today onwards
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 return utcTimeMillis >= today
             }
@@ -270,7 +312,7 @@ fun BottomSheet(
                                         System.currentTimeMillis(),
                                         ""
                                     )
-                                    alarmsViewModel.scheduleNotification(alert)
+                                    alertViewModel.scheduleNotification(alert)
 
                                     onDismiss()
                                 }
@@ -288,8 +330,8 @@ fun BottomSheet(
                     }
                 }
             }
+            var selectedLocalDate by remember { mutableStateOf<LocalDate?>(null) }
 
-            // Date Picker Dialog
             if (showDatePicker) {
                 DatePickerDialog(
                     onDismissRequest = { showDatePicker = false },
@@ -297,19 +339,22 @@ fun BottomSheet(
                         TextButton(
                             onClick = {
                                 datePickerState.selectedDateMillis?.let { millis ->
-                                    val formatter =
-                                        SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                                    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
                                     selectedDate = formatter.format(Date(millis))
+
+                                    selectedLocalDate = Instant.ofEpochMilli(millis)
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate()
                                 }
                                 showDatePicker = false
                             }
                         ) {
-                            Text("OK")
+                            Text(stringResource(R.string.ok))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDatePicker = false }) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 ) {
@@ -327,7 +372,6 @@ fun BottomSheet(
                 }
             }
 
-            // Time Picker Dialog
             if (showTimePicker) {
                 AlertDialog(
                     onDismissRequest = { showTimePicker = false },
@@ -338,16 +382,25 @@ fun BottomSheet(
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                // Format time
-                                val timeString = String.format(
-                                    "%02d:%02d %s",
-                                    if (timePickerState.hour > 12) timePickerState.hour - 12 else if (timePickerState.hour == 0) 12 else timePickerState.hour,
-                                    timePickerState.minute,
-                                    if (timePickerState.hour >= 12) "PM" else "AM"
-                                )
+                                val selectedHour = timePickerState.hour
+                                val selectedMinute = timePickerState.minute
+                                val selectedLocalTime = LocalTime.of(selectedHour, selectedMinute)
+                                val currentDate = LocalDate.now()
+                                val currentLocalTime = LocalTime.now()
 
-                                selectedTime = timeString
-                                showTimePicker = false
+                                if (selectedLocalDate == currentDate && selectedLocalTime.isBefore(currentLocalTime)) {
+                                    Toast.makeText(context,
+                                        context.getString(R.string.selected_time_is_in_the_past), Toast.LENGTH_SHORT).show()
+                                } else {
+                                    val timeString = String.format(
+                                        "%02d:%02d %s",
+                                        if (selectedHour > 12) selectedHour - 12 else if (selectedHour == 0) 12 else selectedHour,
+                                        selectedMinute,
+                                        if (selectedHour >= 12) context.getString(R.string.pm) else context.getString(R.string.am)
+                                    )
+                                    selectedTime = timeString
+                                    showTimePicker = false
+                                }
                             }
                         ) {
                             Text(stringResource(R.string.ok))
@@ -360,6 +413,8 @@ fun BottomSheet(
                     }
                 )
             }
+
+
         }
     }
 }
@@ -380,7 +435,7 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
             val dismissState = rememberDismissState(
                 confirmStateChange = { dismissValue ->
                     if (dismissValue == DismissValue.DismissedToStart) {
-                        alarmsViewModel.cancelNotification(item.date,item.time)
+                        alertViewModel.cancelNotification(item.date,item.time)
                         true
                     } else {
                         false
@@ -402,7 +457,7 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = stringResource(R.string.delete),
                             tint = Color.White,
                             modifier = Modifier.size(28.dp)
                         )

@@ -13,7 +13,7 @@ interface WeatherLocalDataSource {
     suspend fun insertAlert(alert:AlertData):Long
     suspend fun getAllAlerts(): Flow<List<AlertData>>?
     suspend fun deleteAlert(date: String, time: String):Int
-    suspend fun deleteOldAlerts(currentTime: Long):Int
+    suspend fun deleteOldAlerts():Int
     suspend fun insertHomeWeather(weather: HomeWeather):Long
     suspend fun getHomeWeather():Flow<HomeWeather?>
     suspend fun getWorkId(date: String, time: String): String?

@@ -1,4 +1,4 @@
-package com.example.weatherforecast
+package com.example.weatherforecast.utils
 import kotlinx.coroutines.flow.Flow
 
 interface ConnectivityObserver {

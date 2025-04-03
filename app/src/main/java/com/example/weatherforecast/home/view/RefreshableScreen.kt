@@ -128,7 +128,7 @@ fun RefreshableScreen(
 
                     item {
                         WeatherPeriodBox(
-                            stringResource(R.string.hourly_forecast),
+                            stringResource(R.string.today_forecast),
                             painterResource(R.drawable.hour),
                             weatherData,
                         )
@@ -136,7 +136,7 @@ fun RefreshableScreen(
 
                     item {
                         WeatherPeriodBox(
-                            stringResource(R.string.day_forecast),
+                            stringResource(R.string.daily_forecast),
                             painterResource(R.drawable.day),
                             weatherData,
                         )
@@ -396,7 +396,7 @@ fun WeatherPeriodBox(
     icon: Painter,
     weatherData: WeatherData,
 ) {
-    val hourlyForecastString = stringResource(R.string.hourly_forecast)
+    val hourlyForecastString = stringResource(R.string.today_forecast)
     val layoutDirection = LocalLayoutDirection.current
     Box(
         modifier = Modifier

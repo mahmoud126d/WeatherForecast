@@ -7,8 +7,7 @@ import com.example.weatherforecast.repository.WeatherRepository
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 
-class AlarmsViewModelFactory(
-    private var repo: WeatherRepository,
+class AlertViewModelFactory(
     private var locationRepo: LocationRepository,
     private val application: Application,
     private val weatherRepository: WeatherRepository,
@@ -16,7 +15,7 @@ class AlarmsViewModelFactory(
 ) : ViewModelProvider.Factory
 {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AlarmsViewModel(repo, locationRepo,application,weatherRepository,settingsRepository) as T
+        return AlertViewModel( locationRepo,application,weatherRepository,settingsRepository) as T
     }
 }
 

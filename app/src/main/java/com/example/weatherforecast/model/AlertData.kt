@@ -11,5 +11,6 @@ data class AlertData(
     val long:Double,
     val lat:Double,
     val timestamp: Long,
-    val workId: String
+    val workId: String,
+    val isTriggered:Boolean =false,
 )

@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import com.example.weatherforecast.ConnectivityObserver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +20,7 @@ object AndroidConnectivityObserver : ConnectivityObserver {
     override val isConnected: Flow<Boolean> get() = _isConnected.asStateFlow()
 
     @Volatile
-    private var isRegistered = false // Prevent multiple registrations
+    private var isRegistered = false
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
@@ -57,13 +56,6 @@ object AndroidConnectivityObserver : ConnectivityObserver {
         }
     }
 
-    fun unregister() {
-        val connectivityManager = _connectivityManager ?: return
-        if (isRegistered) {
-            connectivityManager.unregisterNetworkCallback(callback)
-            isRegistered = false
-        }
-    }
 
     private fun getCurrentNetworkState(): Boolean {
         val connectivityManager = _connectivityManager ?: return false

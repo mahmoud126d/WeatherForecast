@@ -12,6 +12,5 @@ object Constants {
     //network
     const val BASE_URL = "https://api.openweathermap.org/"
     const val API_KEY = "ec249047fd82a3c25ab8e14f071f6194"
-    const val LON = 32.52627
-    const val LAT = 29.97371
+
 }

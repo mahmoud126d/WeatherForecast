@@ -37,8 +37,8 @@ interface WeatherDao {
     @Query("DELETE FROM AlertData WHERE date = :date AND time = :time")
     suspend fun deleteAlert(date: String, time: String):Int
 
-    @Query("DELETE FROM AlertData WHERE timestamp < :currentTime")
-    suspend fun deleteOldAlerts(currentTime: Long):Int
+    @Query("DELETE FROM AlertData WHERE isTriggered = 1 ")
+    suspend fun deleteOldAlerts():Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHomeWeather(weather: HomeWeather): Long

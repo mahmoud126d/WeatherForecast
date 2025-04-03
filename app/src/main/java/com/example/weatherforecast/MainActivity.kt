@@ -40,6 +40,7 @@ import com.example.weatherforecast.home.view.HomeScreen
 import com.example.weatherforecast.map.view.MapScreen
 import com.example.weatherforecast.settings.view.SettingsScreen
 import com.example.weatherforecast.ui.theme.WeatherForecastTheme
+import com.example.weatherforecast.utils.AndroidConnectivityObserver
 import com.example.weatherforecast.utils.Constants
 
 class MainActivity : ComponentActivity() {

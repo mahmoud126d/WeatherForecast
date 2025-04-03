@@ -1,10 +1,11 @@
-package com.example.weatherforecast
+package com.example.weatherforecast.utils
 
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import com.example.weatherforecast.ConnectivityObserver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +43,7 @@ object AndroidConnectivityObserver : ConnectivityObserver {
 
     fun initialize(appContext: Context) {
         if (contextRef == null || contextRef?.get() == null) {
-            contextRef = WeakReference(appContext.applicationContext) // Use WeakReference to avoid memory leaks
+            contextRef = WeakReference(appContext.applicationContext)
             registerNetworkCallback()
         }
     }

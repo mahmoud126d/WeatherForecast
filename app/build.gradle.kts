@@ -102,4 +102,52 @@ dependencies {
     implementation ("androidx.compose.material:material:1.6.0")
     //work manger
     implementation ("androidx.work:work-runtime-ktx:2.7.1")
+
+// Dependencies for local unit tests
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.hamcrest:hamcrest-all:1.3")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.robolectric:robolectric:4.5.1")
+
+// AndroidX Test - JVM testing
+    testImplementation("androidx.test:core-ktx:1.6.1")
+ testImplementation("androidx.test.ext:junit:1.1.3")
+
+// AndroidX Test - Instrumented testing
+    androidTestImplementation("androidx.test:core:1.1.3")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+
+// Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
+
+// Hamcrest
+    testImplementation("org.hamcrest:hamcrest:2.2")
+    testImplementation("org.hamcrest:hamcrest-library:2.2")
+    androidTestImplementation("org.hamcrest:hamcrest:2.2")
+    androidTestImplementation("org.hamcrest:hamcrest-library:2.2")
+
+// AndroidX and Robolectric
+    testImplementation("androidx.test.ext:junit-ktx:1.1.3")
+    testImplementation("androidx.test:core-ktx:1.6.1")
+    testImplementation("org.robolectric:robolectric:4.11")
+
+// InstantTaskExecutorRule
+    testImplementation("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
+
+// kotlinx-coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0")
+
+// MockK
+    testImplementation("io.mockk:mockk-android:1.13.17")
+    testImplementation("io.mockk:mockk-agent:1.13.17")
+    testImplementation("io.mockk:mockk:1.13.7")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.mockito:mockito-core:5.7.0")
+
+// WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
+
 }

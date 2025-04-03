@@ -25,7 +25,7 @@ class DataStoreManager(private val context: Context) {
 
     val tempUnitFlow: Flow<String?> = context.dataStore.data
         .map { preferences ->
-            preferences[temperatureUnit]?: "celsius"
+            preferences[temperatureUnit]?: "metric"
         }
     val locationMethodFlow: Flow<String?> = context.dataStore.data
         .map { preferences ->

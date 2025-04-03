@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherforecast.AndroidConnectivityObserver
+import com.example.weatherforecast.utils.AndroidConnectivityObserver
 import com.example.weatherforecast.model.WeatherData
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather

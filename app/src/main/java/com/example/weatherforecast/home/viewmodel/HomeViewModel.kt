@@ -1,9 +1,11 @@
 package com.example.weatherforecast.home.viewmodel
 
 import android.location.Location
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherforecast.AndroidConnectivityObserver
+import com.example.weatherforecast.utils.AndroidConnectivityObserver
 import com.example.weatherforecast.model.DayWeather
 import com.example.weatherforecast.model.toCurrentWeather
 import com.example.weatherforecast.model.toFiveDaysWeather
@@ -26,6 +28,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -118,9 +122,7 @@ class HomeViewModel(
                                 .catch { ex -> _hourlyWeather.value = Response.Failure(ex) }
                                 .collect { response ->
                                     val todayDate =
-                                        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-                                            Date()
-                                        )
+                                        SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(Date())
 
                                     val weatherData = response.toHourlyWeather().apply {
                                         listOfHourlyWeather = listOfHourlyWeather

@@ -15,11 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -56,11 +59,12 @@ fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController) 
     // Obtain the SettingsViewModel via the viewModel() composable function
     val settingsViewModel: SettingsViewModel = viewModel(factory = factory)
 
-    Log.d("TAG", "SettingsScreen: ${Locale.getDefault().language}")
 
+    // Wrap the entire Column in a Scrollable Modifier
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .wrapContentSize()
     ) {
         LanguageBox(
@@ -80,7 +84,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, navController: NavController) 
 @Composable
 fun LanguageBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewModel) {
     Box(
-        Modifier
+        modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(color = colorResource(R.color.purple_alpha_30))
@@ -92,7 +96,7 @@ fun LanguageBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewMo
 @Composable
 fun TemperatureBox(modifier: Modifier = Modifier, settingsViewModel: SettingsViewModel) {
     Box(
-        Modifier
+        modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(color = colorResource(R.color.purple_alpha_30))
@@ -108,7 +112,7 @@ fun LocationBox(
     navController: NavController
 ) {
     Box(
-        Modifier
+        modifier
             .padding(20.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(color = colorResource(R.color.purple_alpha_30))
@@ -119,7 +123,7 @@ fun LocationBox(
 
 @Composable
 fun LanguageSelector(settingsViewModel: SettingsViewModel) {
-    val language by settingsViewModel.language.observeAsState()
+    val language by settingsViewModel.language.collectAsState()
     val context = LocalContext.current
     Column(modifier = Modifier.padding(8.dp)) {
         Row(
@@ -174,7 +178,7 @@ fun LanguageSelector(settingsViewModel: SettingsViewModel) {
 
 @Composable
 fun UnitSystemsSelector(settingsViewModel: SettingsViewModel) {
-    val unit by settingsViewModel.tempUnit.observeAsState("metric")
+    val unit by settingsViewModel.tempUnit.collectAsState("metric")
 
     Column(modifier = Modifier.padding(8.dp)) {
         Row(
@@ -255,7 +259,7 @@ fun UnitSystemsSelector(settingsViewModel: SettingsViewModel) {
 
 @Composable
 fun LocationSelector(settingsViewModel: SettingsViewModel, navController: NavController) {
-    val locationSelection by settingsViewModel.locationSelection.observeAsState()
+    val locationSelection by settingsViewModel.locationSelection.collectAsState()
     val context = LocalContext.current
     Column(modifier = Modifier.padding(8.dp)) {
         Row(

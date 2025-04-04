@@ -225,8 +225,18 @@ class HomeViewModel(
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val dayNameFormat = SimpleDateFormat("EEE", Locale.getDefault())
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
 
         return groupedByDay.entries
+            .filter { (dateString, _) ->
+                val date = dateFormat.parse(dateString)
+                date != null && date.after(today)
+            }
             .sortedBy { (dateString, _) ->
                 dateFormat.parse(dateString)
             }
@@ -243,6 +253,7 @@ class HomeViewModel(
                 )
             }
     }
+
 
 
     fun getTemperatureUnit() {

@@ -93,20 +93,17 @@ fun RefreshableScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
 
             ) {
-
             when (val dailyWeather = dailyWeatherState.value) {
                 is Response.Failure -> {
                     item {
                         Text(stringResource(R.string.error_while_loading_weather_data))
                     }
                 }
-
                 is Response.Loading -> {
                     item {
                         LoadingAnimation()
                     }
                 }
-
                 is Response.Success -> {
                     val weatherData = dailyWeather.data
                     item {
@@ -126,6 +123,27 @@ fun RefreshableScreen(
                             humidity = weatherData.humidity,
                         )
                     }
+                    item {
+                        WeatherPeriodBox(
+                            stringResource(R.string.daily_forecast),
+                            painterResource(R.drawable.day),
+                            weatherData,
+                        )
+                    }
+                }
+            }
+            when (val hourlyWeather = hourlyWeatherState.value) {
+                is Response.Failure -> {
+                    item {
+                        Text(stringResource(R.string.error_while_loading_weather_data))
+                    }
+                }
+                is Response.Loading -> {
+
+                }
+
+                is Response.Success -> {
+                    val weatherData = hourlyWeather.data
 
                     item {
                         WeatherPeriodBox(
@@ -135,14 +153,6 @@ fun RefreshableScreen(
                         )
                     }
 
-                    item {
-                        WeatherPeriodBox(
-                            stringResource(R.string.daily_forecast),
-                            painterResource(R.drawable.day),
-                            weatherData,
-                        )
-
-                    }
                 }
             }
         }
@@ -512,17 +522,22 @@ fun LoadingAnimation(
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_animation))
     val animationState by animateLottieCompositionAsState(
         composition = composition,
-        isPlaying = true
+        isPlaying = true,
+        iterations = 100
     )
     LottieAnimation(
         composition = composition,
         progress = { animationState },
-        modifier = modifier.fillMaxSize().wrapContentSize()
+        modifier = modifier
+            .fillMaxSize()
+            .wrapContentSize()
     )
 
 }
 
-private fun hPaToPercentage(hPa: Int): Double {
-    val standardPressure = 1013.25
-    return (hPa.toDouble() / standardPressure) * 100
+private fun hPaToPercentage(pressure: Int): Double {
+    val minPressure = 980
+    val maxPressure = 1050
+
+    return ((pressure - minPressure).toFloat() / (maxPressure - minPressure) * 100).toDouble()
 }

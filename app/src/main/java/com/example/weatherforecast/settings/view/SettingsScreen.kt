@@ -283,7 +283,7 @@ fun LocationSelector(settingsViewModel: SettingsViewModel, navController: NavCon
             RadioButtonRow(
                 stringResource(R.string.map),
                 "map",
-                locationSelection ?: "gps"
+                locationSelection ?: "map"
             ) {
                 navController.navigate(Constants.MAP_SCREEN)
                 settingsViewModel.saveLocationSelection("map")
@@ -291,7 +291,7 @@ fun LocationSelector(settingsViewModel: SettingsViewModel, navController: NavCon
             RadioButtonRow(
                 stringResource(R.string.gps),
                 "gps",
-                locationSelection ?: "gps"
+                locationSelection ?: "map"
             ) {
                 settingsViewModel.saveLocationSelection("gps")
             }

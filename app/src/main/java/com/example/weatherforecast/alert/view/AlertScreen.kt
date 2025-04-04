@@ -1,4 +1,4 @@
-package com.example.weatherforecast.alarms.view
+package com.example.weatherforecast.alert.view
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -74,10 +74,15 @@ import com.example.weatherforecast.utils.LanguageHelper
 import com.example.weatherforecast.utils.LocationManager
 import android.Manifest
 import android.widget.Toast
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.ui.tooling.preview.Preview
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.weatherforecast.R
-import com.example.weatherforecast.alarms.viewmodel.AlertViewModel
-import com.example.weatherforecast.alarms.viewmodel.AlertViewModelFactory
+import com.example.weatherforecast.alert.viewmodel.AlertViewModel
+import com.example.weatherforecast.alert.viewmodel.AlertViewModelFactory
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
 import com.example.weatherforecast.model.AlertData
@@ -193,13 +198,11 @@ fun AlarmsScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.no_alerts_set_tap_to_add_a_weather_alert))
+                    Animation()
                 }
             } else {
-                // Display your alert list here
                 AlertColumn(alerts = alertList.value)
             }
-            // BottomSheet visibility logic
             BottomSheet(
                 isVisible = isBottomSheetVisible,
                 onDismiss = { isBottomSheetVisible = false }
@@ -512,4 +515,22 @@ fun AlertPreview(modifier: Modifier = Modifier) {
         date = "12/12/1997",
         time = "4:00Pm"
     )
+}
+
+@Composable
+fun Animation(
+    modifier: Modifier = Modifier
+) {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.alert))
+    val animationState by animateLottieCompositionAsState(
+        composition = composition,
+        isPlaying = true,
+        iterations = 100
+    )
+    LottieAnimation(
+        composition = composition,
+        progress = { animationState },
+        modifier = modifier.fillMaxSize().wrapContentSize()
+    )
+
 }

@@ -45,4 +45,5 @@
     <string name="see_full_forecast">%1$s . See Full forecast</string>
     <string name="selected_time_is_in_the_past">Selected time is in the past!</string>
     <string name="no_favorites_set_tap_to_add_a_favorite">No favorites set. Tap + to add a Favorite.</string>
+    <string name="splash">splash</string>
 </resources>

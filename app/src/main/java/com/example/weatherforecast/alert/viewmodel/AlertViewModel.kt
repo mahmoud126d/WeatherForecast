@@ -1,7 +1,6 @@
-package com.example.weatherforecast.alarms.viewmodel
+package com.example.weatherforecast.alert.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequestBuilder

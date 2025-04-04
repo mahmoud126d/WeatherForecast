@@ -32,7 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.weatherforecast.alarms.view.AlarmsScreen
+import com.example.weatherforecast.alert.view.AlarmsScreen
 import com.example.weatherforecast.favorites.view.FavoriteMapScreen
 import com.example.weatherforecast.favorites.view.FavoriteWeatherScreen
 import com.example.weatherforecast.favorites.view.FavoritesScreen
@@ -90,7 +90,7 @@ fun MainScreen(navController: NavHostController) {
                 else -> stringResource(id = R.string.app_name)
             }
 
-            if (currentRoute != Constants.HOME_SCREEN) {
+            if (currentRoute != Constants.HOME_SCREEN && currentRoute != Constants.SPLASH_SCREEN) {
                 TopAppBar(
                     navController,
                     title = title
@@ -114,9 +114,10 @@ fun MainScreen(navController: NavHostController) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Constants.HOME_SCREEN,
+            startDestination = Constants.SPLASH_SCREEN,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Constants.SPLASH_SCREEN) { SplashScreen(navController = navController) }
             composable(Constants.HOME_SCREEN) { HomeScreen() }
             composable(Constants.ALERT_SCREEN) { AlarmsScreen() }
             composable(Constants.FAVORITES_SCREEN) { FavoritesScreen(navController = navController) }

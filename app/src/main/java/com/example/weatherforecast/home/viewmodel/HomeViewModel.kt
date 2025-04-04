@@ -63,8 +63,8 @@ class HomeViewModel(
     // Location state
     val location: StateFlow<Location?> = locationRepository.locationFlow
 
-    private val _toastEvent = MutableSharedFlow<String>()
-    val toastEvent = _toastEvent.asSharedFlow()
+//    private val _toastEvent = MutableSharedFlow<String>()
+//    val toastEvent = _toastEvent.asSharedFlow()
 
     private var isOnline = false
 

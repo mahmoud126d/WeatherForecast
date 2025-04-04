@@ -46,4 +46,7 @@
     <string name="selected_time_is_in_the_past">Selected time is in the past!</string>
     <string name="no_favorites_set_tap_to_add_a_favorite">No favorites set. Tap + to add a Favorite.</string>
     <string name="splash">splash</string>
+    <string name="temperature_celsius_speed_meter_sec">Temperature : Celsius ,speed : meter/sec</string>
+    <string name="temperature_kelvin_speed_miles_hour">Temperature : kelvin ,speed : miles/hour</string>
+    <string name="temperature_fahrenheit_speed_miles_hour">Temperature : Fahrenheit ,speed : miles/hour</string>
 </resources>

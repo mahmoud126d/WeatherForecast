@@ -46,4 +46,9 @@
     <string name="see_full_forecast">%1$s . اغضط لرؤيه نشرة الطقس</string>
     <string name="selected_time_is_in_the_past">حدد وقت فالمستقبل من فضلك!</string>
     <string name="no_favorites_set_tap_to_add_a_favorite">لم يتم تعيين أي مفضلات. اضغط على + لإضافة مفضله</string>
+    <string name="splash">splash</string>
+    <string name="temperature_celsius_speed_meter_sec">درجة الحرارة: مئوية، السرعة: متر/ثانية</string>
+    <string name="temperature_kelvin_speed_miles_hour">درجة الحرارة: كلفن، السرعة: ميل/ساعة</string>
+    <string name="temperature_fahrenheit_speed_miles_hour">درجة الحرارة: فهرنهايت، السرعة: ميل/ساعة</string>
+
 </resources>

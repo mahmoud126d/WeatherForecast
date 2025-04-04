@@ -34,8 +34,8 @@ import com.example.weatherforecast.repository.WeatherRepositoryImpl
 private const val TAG = "HomeScreen"
 
 private const val MY_LOCATION_PERMISSION_ID = 5005
-lateinit var tempUnitSymbol: String
-lateinit var speedUnitSymbol: String
+ var tempUnitSymbol: String = ""
+ var speedUnitSymbol: String = ""
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -92,10 +92,10 @@ fun HomeScreen() {
             }
         }
         homeViewModel.getHomeDetails()
-        homeViewModel.toastEvent.collect { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
-        }
+//        homeViewModel.toastEvent.collect { message ->
+//            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+//
+//        }
     }
     
     RefreshableScreen(

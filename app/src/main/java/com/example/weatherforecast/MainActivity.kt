@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
@@ -165,7 +166,8 @@ fun BottomNavBar(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        contentColor = Color.Red
     ) {
         items.forEach { screen ->
             NavigationBarItem(
@@ -180,7 +182,11 @@ fun BottomNavBar(navController: NavController) {
                             restoreState = true
                         }
                     }
-                }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = colorResource(R.color.purple_500),
+                    selectedIconColor =colorResource(R.color.background_color),
+                )
             )
         }
     }

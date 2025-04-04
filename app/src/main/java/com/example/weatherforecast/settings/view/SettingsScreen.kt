@@ -208,7 +208,7 @@ fun UnitSystemsSelector(settingsViewModel: SettingsViewModel) {
                 settingsViewModel.saveTemperatureUnit("metric")
             }
             Text(
-                "Temperature : Celsius ,speed : meter/sec",
+                stringResource(R.string.temperature_celsius_speed_meter_sec),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 fontSize = 12.sp
             )
@@ -222,7 +222,7 @@ fun UnitSystemsSelector(settingsViewModel: SettingsViewModel) {
                 settingsViewModel.saveTemperatureUnit("standard")
             }
             Text(
-                "Temperature : kelvin ,speed : miles/hour",
+                stringResource(R.string.temperature_kelvin_speed_miles_hour),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 fontSize = 12.sp
             )
@@ -236,7 +236,7 @@ fun UnitSystemsSelector(settingsViewModel: SettingsViewModel) {
                 settingsViewModel.saveTemperatureUnit("imperial")
             }
             Text(
-                text = "Temperature : Fahrenheit ,speed : miles/hour",
+                text = stringResource(R.string.temperature_fahrenheit_speed_miles_hour),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 fontSize = 12.sp
             )

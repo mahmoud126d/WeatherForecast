@@ -40,51 +40,43 @@ class WeatherLocalDataSourceImpTest {
     }
 
     @Test
-    fun testInsertHomeWeather() = runTest {
+    fun insertAndRetrieveHomeWeather_shouldReturnSameWeather() = runTest {
+        // Given
         val homeWeather = HomeWeather(
-            id = 20,
-            temperature = 73.0,
-            humidity = 3,
-            description = "Clear Sky",
-            pressure = 99,
+            id = 1,
+            temperature = 25.5,
+            humidity = 60,
+            description = "Sunny",
+            pressure = 1013,
             city = "Suez",
-            speed = 30.0,
-            cloud = 44,
-            date = "4/3/2025",
-            address = "",
-            lastUpdate = "2/3/2025"
+            speed = 5.5,
+            cloud = 0,
+            date = "4/4/2025",
+            address = "Main Street",
+            lastUpdate = "4/4/2025"
         )
 
-        val result = weatherLocalDataSourceImp.insertHomeWeather(homeWeather)
+        // When
+        val insertResult = weatherLocalDataSourceImp.insertHomeWeather(homeWeather)
 
-
-        assertTrue(result > 0)
-    }
-
-    @Test
-    fun testGetHomeWeather() = runTest {
-        val homeWeather = HomeWeather(
-            id = 20,
-            temperature = 73.0,
-            humidity = 3,
-            description = "Clear Sky",
-            pressure = 99,
-            city = "Suez",
-            speed = 30.0,
-            cloud = 44,
-            date = "4/3/2025",
-            address = "",
-            lastUpdate = "2/3/2025"
-        )
-
-        weatherLocalDataSourceImp.insertHomeWeather(homeWeather)
-
+        // Then
         val result = weatherLocalDataSourceImp.getHomeWeather().first()
 
+        // Debug
+        println("Inserted ID: $insertResult")
+        println("Retrieved Weather: $result")
+
+        assertThat(insertResult, `is`(1L))
         assertNotNull(result)
-        assertThat(result?.id, `is`(20))
         assertThat(result?.city, `is`("Suez"))
-        assertThat(result?.description, `is`("Clear Sky"))
+        assertThat(result?.temperature, `is`(25.5))
+        assertThat(result?.description, `is`("Sunny"))
+        assertThat(result?.pressure, `is`(1013))
+        assertThat(result?.speed, `is`(5.5))
+        assertThat(result?.cloud, `is`(0))
+        assertThat(result?.date, `is`("4/4/2025"))
+        assertThat(result?.address, `is`("Main Street"))
+        assertThat(result?.lastUpdate, `is`("4/4/2025"))
     }
 
     @After

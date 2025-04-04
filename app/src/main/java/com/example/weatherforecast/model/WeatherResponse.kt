@@ -50,7 +50,7 @@ data class DayWeather(
     val icon:String,
     var time:String
 )
-lateinit var weatherData: WeatherData
+ var weatherData: WeatherData = WeatherData()
 fun WeatherResponse.toCurrentWeather(): WeatherData {
     weatherData = WeatherData(
         lat = coord.lat,

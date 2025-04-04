@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -68,6 +69,7 @@ class NotificationWorker(
                     appId = Constants.API_KEY
                 )
                     .catch {
+                        Log.d(TAG, "doWork: first catch")
                         showNotification(
                             context,
                             "",
@@ -92,6 +94,7 @@ class NotificationWorker(
 
                 return@runBlocking Result.success()
             } catch (ex: Exception) {
+                Log.d(TAG, "doWork: second catch")
                 showNotification(
                     context,
                     "",

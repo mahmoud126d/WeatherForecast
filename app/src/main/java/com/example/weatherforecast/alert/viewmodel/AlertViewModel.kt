@@ -141,14 +141,26 @@ fun scheduleNotification(alert: AlertData) {
         }
     }
 
-    private fun convertDateTimeToTimeStamp(date:String,time:String):Long{
-        val dateStr = "$date $time"
+    private fun convertDateTimeToTimeStamp(date: String, time: String): Long {
+        val convertedDate = convertArabicToEnglish(date)
+        val convertedTime = convertArabicToEnglish(time).replace("م", "PM").replace("ص", "AM")
+
+        val dateStr = "$convertedDate $convertedTime"
         val format = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.ENGLISH)
         format.timeZone = TimeZone.getTimeZone("UTC")
 
-        val date: Date = format.parse(dateStr)
-        val timestamp: Long = date.time / 1000
-        return timestamp
+        val parsedDate: Date = format.parse(dateStr) ?: return 0
+        return parsedDate.time / 1000
+    }
+
+    private fun convertArabicToEnglish(input: String): String {
+        val arabicDigits = "٠١٢٣٤٥٦٧٨٩"
+        val englishDigits = "0123456789"
+
+        return input.map { char ->
+            val index = arabicDigits.indexOf(char)
+            if (index != -1) englishDigits[index] else char
+        }.joinToString("")
     }
     
 }

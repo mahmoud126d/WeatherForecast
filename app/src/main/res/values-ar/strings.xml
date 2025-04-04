@@ -43,7 +43,7 @@
     <string name="am">ص</string>
     <string name="check_your_internet_connection">تاكد من اتصالك بالانترنت</string>
     <string name="weather_notification">اشعارات الطقس</string>
-    <string name="see_full_forecast">%1$s . اغضط لرؤيه نشرة الطقس</string>
+    <string name="see_full_forecast">%1$s . اضغط لرؤيه نشرة الطقس</string>
     <string name="selected_time_is_in_the_past">حدد وقت فالمستقبل من فضلك!</string>
     <string name="no_favorites_set_tap_to_add_a_favorite">لم يتم تعيين أي مفضلات. اضغط على + لإضافة مفضله</string>
     <string name="splash">splash</string>

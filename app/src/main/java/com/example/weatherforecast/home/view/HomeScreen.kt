@@ -30,6 +30,7 @@ import com.example.weatherforecast.network.RetrofitHelper
 import com.example.weatherforecast.repository.LocationRepository
 import com.example.weatherforecast.repository.SettingsRepository
 import com.example.weatherforecast.repository.WeatherRepositoryImpl
+import kotlinx.coroutines.flow.first
 
 private const val TAG = "HomeScreen"
 
@@ -74,7 +75,7 @@ fun HomeScreen() {
                 MY_LOCATION_PERMISSION_ID
             )
         }
-        val unit = homeViewModel.getTemperatureUnit()
+        val unit = homeViewModel.tempFlow.first()
         when (unit) {
             "metric" -> {
                 tempUnitSymbol = context.getString(R.string.c)

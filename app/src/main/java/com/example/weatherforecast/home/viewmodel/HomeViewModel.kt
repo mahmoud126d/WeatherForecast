@@ -66,6 +66,7 @@ class HomeViewModel(
 //    private val _toastEvent = MutableSharedFlow<String>()
 //    val toastEvent = _toastEvent.asSharedFlow()
 
+    val tempFlow = settingsRepository.temperatureUnitFlow
     private var isOnline = false
 
     init {
@@ -244,8 +245,10 @@ class HomeViewModel(
     }
 
 
-    suspend fun getTemperatureUnit(): String {
-        return settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+    fun getTemperatureUnit() {
+        viewModelScope.launch(Dispatchers.IO) {
+             settingsRepository.temperatureUnitFlow.first() ?: DEFAULT_UNIT
+        }
     }
 
 

@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageHelper
-import com.example.weatherforecast.LocationManager
+import com.example.weatherforecast.db.DataStoreManager
+import com.example.weatherforecast.utils.LanguageHelper
+import com.example.weatherforecast.utils.LocationManager
 import com.example.weatherforecast.map.viewmodel.MapViewModel
 import com.example.weatherforecast.map.viewmodel.MapViewModelFactory
 import com.example.weatherforecast.repository.LocationRepository

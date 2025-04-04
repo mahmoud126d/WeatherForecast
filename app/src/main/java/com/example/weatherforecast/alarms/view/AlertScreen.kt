@@ -69,11 +69,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageHelper
-import com.example.weatherforecast.LocationManager
+import com.example.weatherforecast.db.DataStoreManager
+import com.example.weatherforecast.utils.LanguageHelper
+import com.example.weatherforecast.utils.LocationManager
 import android.Manifest
 import android.widget.Toast
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.weatherforecast.R
 import com.example.weatherforecast.alarms.viewmodel.AlertViewModel
 import com.example.weatherforecast.alarms.viewmodel.AlertViewModelFactory
@@ -465,7 +466,6 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
                 },
                 dismissContent = {
                     AlertItem(
-                        city = item.city,
                         date = item.date,
                         time = item.time
                     )
@@ -476,7 +476,7 @@ fun AlertColumn(modifier: Modifier = Modifier, alerts: List<AlertData>) {
 }
 
 @Composable
-fun AlertItem(modifier: Modifier = Modifier, city: String, date: String, time: String) {
+fun AlertItem(modifier: Modifier = Modifier, date: String, time: String) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -484,24 +484,32 @@ fun AlertItem(modifier: Modifier = Modifier, city: String, date: String, time: S
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(city, fontSize = 18.sp)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(date, fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(time, fontSize = 14.sp, color = Color.Gray)
             }
             Icon(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Alert",
-                tint = colorResource(R.color.purple_500)
+                tint = colorResource(R.color.purple_500),
+                modifier = Modifier.size(30.dp)
             )
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun AlertPreview(modifier: Modifier = Modifier) {
+    AlertItem(
+        date = "12/12/1997",
+        time = "4:00Pm"
+    )
 }

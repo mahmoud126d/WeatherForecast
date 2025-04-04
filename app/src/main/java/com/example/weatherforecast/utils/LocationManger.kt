@@ -1,4 +1,4 @@
-package com.example.weatherforecast
+package com.example.weatherforecast.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,8 +7,6 @@ import android.location.Geocoder
 import android.location.Location
 import android.os.Build
 import android.os.Looper
-import android.util.Log
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult

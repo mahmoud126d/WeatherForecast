@@ -18,7 +18,7 @@
     <string name="f">ف°</string>
     <string name="k">ك°</string>
     <string name="Home">الرئيسيه</string>
-    <string name="alarm">التنبيهات</string>
+    <string name="alert">التنبيهات</string>
     <string name="favorites">المفضله</string>
     <string name="settings">الاعدادات</string>
     <string name="m_s">م/ث</string>
@@ -38,6 +38,12 @@
     <string name="gps">جي بي إس</string>
     <string name="map">خريطة</string>
     <string name="location_select">اختيار الموقع</string>
-
-
+    <string name="pm">م</string>
+    <string name="delete">حذف</string>
+    <string name="am">ص</string>
+    <string name="check_your_internet_connection">تاكد من اتصالك بالانترنت</string>
+    <string name="weather_notification">اشعارات الطقس</string>
+    <string name="see_full_forecast">%1$s . اغضط لرؤيه نشرة الطقس</string>
+    <string name="selected_time_is_in_the_past">حدد وقت فالمستقبل من فضلك!</string>
+    <string name="no_favorites_set_tap_to_add_a_favorite">لم يتم تعيين أي مفضلات. اضغط على + لإضافة مفضله</string>
 </resources>

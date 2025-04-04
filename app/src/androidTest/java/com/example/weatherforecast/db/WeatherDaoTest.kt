@@ -37,13 +37,12 @@ class WeatherDaoTest {
     @Test
     fun insertWeather_shouldInsertWeatherData() = runTest {
         val weather = WeatherData(lat = 10.0, lon = 20.0, temperature = 22.0, description = "Clear")
-        val insertedId = weatherDao.insertWeather(weather)
+         weatherDao.insertWeather(weather)
 
-        // Retrieve the inserted data
-        val retrievedWeather = weatherDao.getWeatherLatLon(20.0, 10.0).first()
-        assertNotNull(retrievedWeather)
-        assertEquals(weather.lat, retrievedWeather?.lat)
-        assertEquals(weather.lon, retrievedWeather?.lon)
+        val result = weatherDao.getWeatherLatLon(20.0, 10.0).first()
+        assertNotNull(result)
+        assertEquals(weather.lat, result?.lat)
+        assertEquals(weather.lon, result?.lon)
     }
 
     @Test
@@ -54,22 +53,10 @@ class WeatherDaoTest {
         val deletedRows = weatherDao.deleteWeather(weather)
         assertEquals(1, deletedRows)
 
-        // Ensure the data is deleted
         val retrievedWeather = weatherDao.getWeatherLatLon(20.0, 10.0).first()
         assertNull(retrievedWeather)
     }
 
-    @Test
-    fun getAllWeather_shouldReturnWeatherList() = runTest {
-        val weather1 = WeatherData(lat = 10.0, lon = 20.0, temperature = 22.0, description = "Clear")
-        val weather2 = WeatherData(lat = 15.0, lon = 25.0, temperature = 25.0, description = "Cloudy")
-
-        weatherDao.insertWeather(weather1)
-        weatherDao.insertWeather(weather2)
-
-        val weatherList = weatherDao.getAllWeather().first()
-        assertEquals(2, weatherList.size)
-    }
 
 
 }

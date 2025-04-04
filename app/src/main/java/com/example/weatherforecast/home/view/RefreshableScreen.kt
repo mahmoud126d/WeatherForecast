@@ -53,9 +53,10 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.example.weatherforecast.LanguageHelper
+import com.example.weatherforecast.utils.LanguageHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.model.WeatherData
+import com.example.weatherforecast.utils.AppIcons
 import com.example.weatherforecast.utils.Response
 import kotlinx.coroutines.delay
 
@@ -239,7 +240,7 @@ fun WeatherInfoCard(
                     ) {
                         Image(
                             contentDescription = "",
-                            painter = painterResource(id = R.drawable.cloudandsun),
+                            painter = painterResource(id = AppIcons.getWeatherIcon(weatherData.icon)),
                             modifier = Modifier.size(60.dp)
                         )
                         Spacer(Modifier.height(8.dp))
@@ -447,7 +448,7 @@ fun WeatherPeriodBox(
                     items(hourlyWeatherList.size) { index ->
                         HourlyWeatherColumn(
                             hourlyWeatherList[index].time,
-                            painterResource(R.drawable.cloudandsun),
+                            painterResource(id = AppIcons.getWeatherIcon(hourlyWeatherList[index].icon)),
                             "${LanguageHelper.formatNumber(hourlyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }
@@ -460,7 +461,7 @@ fun WeatherPeriodBox(
                     items(dailyWeatherList.size) { index ->
                         HourlyWeatherColumn(
                             dailyWeatherList[index].time,
-                            painterResource(R.drawable.cloudandsun),
+                            painterResource(id = AppIcons.getWeatherIcon(dailyWeatherList[index].icon)),
                             "${LanguageHelper.formatNumber(dailyWeatherList[index].temp.toInt())}${tempUnitSymbol}"
                         )
                     }

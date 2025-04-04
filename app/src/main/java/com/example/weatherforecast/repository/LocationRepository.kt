@@ -2,7 +2,7 @@ package com.example.weatherforecast.repository
 
 import android.location.Address
 import android.location.Location
-import com.example.weatherforecast.LocationManager
+import com.example.weatherforecast.utils.LocationManager
 import kotlinx.coroutines.flow.StateFlow
 
 class LocationRepository(private val locationManager: LocationManager) {

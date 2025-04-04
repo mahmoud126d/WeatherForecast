@@ -81,7 +81,7 @@ fun MainScreen(navController: NavHostController) {
                 navController.currentBackStackEntryAsState().value?.destination?.route
             val title = when (currentRoute) {
                 Constants.HOME_SCREEN -> stringResource(R.string.Home)
-                Constants.ALARM_SCREEN -> stringResource(R.string.alarm)
+                Constants.ALERT_SCREEN -> stringResource(R.string.alert)
                 Constants.FAVORITES_SCREEN -> stringResource(R.string.favorites)
                 Constants.SETTINGS_SCREEN -> stringResource(R.string.settings)
                 Constants.MAP_SCREEN -> stringResource(R.string.map)
@@ -102,7 +102,7 @@ fun MainScreen(navController: NavHostController) {
                 navController.currentBackStackEntryAsState().value?.destination?.route
             val screensWithBottomBar = listOf(
                 Constants.HOME_SCREEN,
-                Constants.ALARM_SCREEN,
+                Constants.ALERT_SCREEN,
                 Constants.FAVORITES_SCREEN,
                 Constants.SETTINGS_SCREEN
             )
@@ -118,7 +118,7 @@ fun MainScreen(navController: NavHostController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Constants.HOME_SCREEN) { HomeScreen() }
-            composable(Constants.ALARM_SCREEN) { AlarmsScreen() }
+            composable(Constants.ALERT_SCREEN) { AlarmsScreen() }
             composable(Constants.FAVORITES_SCREEN) { FavoritesScreen(navController = navController) }
             composable(Constants.SETTINGS_SCREEN) { SettingsScreen(navController = navController) }
             composable(Constants.MAP_SCREEN) { MapScreen(navController = navController) }

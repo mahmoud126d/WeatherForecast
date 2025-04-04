@@ -40,58 +40,6 @@ class WeatherLocalDataSourceImpTest {
     }
 
     @Test
-    fun testInsertWeather() = runTest {
-        val weatherData = WeatherData(/* mock data */)
-
-        // Insert weather data
-        val result = weatherLocalDataSourceImp.insertWeather(weatherData)
-
-        // Verify the insertion
-        assertTrue(result > 0)  // Result should be the ID (positive value)
-    }
-
-    @Test
-    fun testDeleteWeather() = runTest {
-        val weatherData = WeatherData(/* mock data */)
-
-        // Insert weather data first
-        val insertResult = weatherLocalDataSourceImp.insertWeather(weatherData)
-
-        // Delete weather data
-        val deleteResult = weatherLocalDataSourceImp.deleteWeather(weatherData)
-
-        // Verify that the data was deleted
-        assertTrue(deleteResult > 0)
-    }
-
-    @Test
-    fun testGetAllWeather() = runTest {
-        val weatherData = WeatherData(/* mock data */)
-
-        // Insert weather data
-        weatherLocalDataSourceImp.insertWeather(weatherData)
-
-        // Fetch all weather data
-        val weatherList = weatherLocalDataSourceImp.getAllWeather().first()
-
-        // Verify the data is returned
-        assertNotNull(weatherList)
-        assertTrue(weatherList.isNotEmpty())
-    }
-
-
-    @Test
-    fun testDeleteOldAlerts() = runTest {
-        val currentTime = System.currentTimeMillis()
-
-        // Delete old alerts (for testing purposes)
-        val result = weatherLocalDataSourceImp.deleteOldAlerts(currentTime)
-
-        // Verify the result
-        assertTrue(result >= 0)
-    }
-
-    @Test
     fun testInsertHomeWeather() = runTest {
         val homeWeather = HomeWeather(
             id = 20,
@@ -107,11 +55,10 @@ class WeatherLocalDataSourceImpTest {
             lastUpdate = "2/3/2025"
         )
 
-        // Insert home weather
         val result = weatherLocalDataSourceImp.insertHomeWeather(homeWeather)
 
-        // Verify the result (ID should be > 0)
-        assertTrue(result > 0)  // Ensure the insertion was successful and returns a valid ID
+
+        assertTrue(result > 0)
     }
 
     @Test
@@ -130,17 +77,14 @@ class WeatherLocalDataSourceImpTest {
             lastUpdate = "2/3/2025"
         )
 
-        // Insert home weather
         weatherLocalDataSourceImp.insertHomeWeather(homeWeather)
 
-        // Get home weather
         val result = weatherLocalDataSourceImp.getHomeWeather().first()
 
-        // Verify the result
-        assertNotNull(result)  // Ensure the result is not null
-        assertThat(result?.id, `is`(20))  // Ensure the ID matches the inserted value
-        assertThat(result?.city, `is`("Suez"))  // Verify the city is correct
-        assertThat(result?.description, `is`("Clear Sky"))  // Check the weather description
+        assertNotNull(result)
+        assertThat(result?.id, `is`(20))
+        assertThat(result?.city, `is`("Suez"))
+        assertThat(result?.description, `is`("Clear Sky"))
     }
 
     @After

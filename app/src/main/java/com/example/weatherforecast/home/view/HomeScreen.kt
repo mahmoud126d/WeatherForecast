@@ -2,7 +2,6 @@ package com.example.weatherforecast.home.view
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -15,15 +14,12 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageHelper
+import com.example.weatherforecast.db.DataStoreManager
+import com.example.weatherforecast.utils.LanguageHelper
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
@@ -52,7 +48,7 @@ fun HomeScreen() {
                 WeatherDataBase.getInstance(context).getWeatherDao()
             )
         ),
-        LocationRepository(com.example.weatherforecast.LocationManager(context)),
+        LocationRepository(com.example.weatherforecast.utils.LocationManager(context)),
         SettingsRepository(
             DataStoreManager(context.applicationContext),
             LanguageHelper

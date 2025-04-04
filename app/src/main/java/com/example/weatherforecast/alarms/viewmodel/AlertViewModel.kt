@@ -136,7 +136,8 @@ fun scheduleNotification(alert: AlertData) {
         viewModelScope.launch(Dispatchers.IO) {
             if (deletedAlertStack.isNotEmpty()) {
                 val lastDeleted = deletedAlertStack.pop()
-                weatherRepository.insertAlert(lastDeleted)
+                //weatherRepository.insertAlert(lastDeleted)
+                scheduleNotification(lastDeleted)
             }
         }
     }

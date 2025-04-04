@@ -4,7 +4,6 @@ package com.example.weatherforecast.favorites.view
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
 //noinspection UsingMaterialAndMaterial3Libraries
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,15 +48,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageHelper
-import com.example.weatherforecast.LocationManager
+import com.example.weatherforecast.db.DataStoreManager
+import com.example.weatherforecast.utils.LanguageHelper
+import com.example.weatherforecast.utils.LocationManager
 import com.example.weatherforecast.R
 import com.example.weatherforecast.db.WeatherDataBase
 import com.example.weatherforecast.db.WeatherLocalDataSourceImp
@@ -170,18 +170,7 @@ fun FavoritesScreen(
 
                 }
             }
-//            LaunchedEffect(Unit) {
-//                favoritesViewModel.getAllFavorites()
-//                favoritesViewModel.internetToastEvent.collect { message ->
-//                    coroutineScope.launch {
-//                        snackbarHostState.showSnackbar(
-//                            message = message,
-//                            duration = SnackbarDuration.Short,
-//                        )
-//                    }
-//
-//                }
-//            }
+
         }
     }
 }
@@ -200,7 +189,7 @@ fun FavoriteColumn(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("No favorites set. Tap + to add a weather alert.")
+            Text(stringResource(R.string.no_favorites_set_tap_to_add_a_favorite))
         }
     } else {
         LazyColumn(
@@ -321,7 +310,7 @@ fun FavoriteWeatherScreen(modifier: Modifier = Modifier) {
         dailyWeatherState = dailyWeatherState,
         onRefresh = {
             if (!favoritesViewModel.isOnline()) {
-                Toast.makeText(context, "You are offline", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.check_your_internet_connection), Toast.LENGTH_SHORT).show()
             }
         },
     )

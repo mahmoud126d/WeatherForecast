@@ -3,7 +3,7 @@ package com.example.weatherforecast.utils
 object Constants {
     const val HOME_SCREEN = "Home"
     const val FAVORITES_SCREEN = "favorite"
-    const val ALARM_SCREEN = "alarm"
+    const val ALERT_SCREEN = "alert"
     const val SETTINGS_SCREEN = "settings"
     const val MAP_SCREEN = "map"
     const val FAVORITE_MAP_SCREEN = "favorite_map"

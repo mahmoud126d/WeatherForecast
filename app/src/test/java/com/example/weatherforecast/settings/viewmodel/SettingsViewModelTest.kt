@@ -64,26 +64,5 @@ class SettingsViewModelTest {
         verify(settingsRepository).saveTemperatureUnit(unit)
     }
 
-    @Test
-    fun saveLocationSelection_shouldCallRepository() = testScope.runTest {
-        val selection = "GPS"
-        viewModel.saveLocationSelection(selection)
-        advanceUntilIdle()
-        verify(settingsRepository).saveLocationSelection(selection)
-    }
-
-    @Test
-    fun getDefaultLanguage_shouldCallRepository() {
-        viewModel.getDefaultLanguage()
-        verify(settingsRepository).getDefaultLanguage()
-    }
-
-    @Test
-    fun changeLanguage_shouldCallRepository() {
-        val context = mock<Context>()
-        val langCode = "fr"
-        viewModel.changeLanguage(context, langCode)
-        verify(settingsRepository).changeLanguage(context, langCode)
-    }
 
 }

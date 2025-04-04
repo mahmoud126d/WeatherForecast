@@ -1,4 +1,4 @@
-package com.example.weatherforecast
+package com.example.weatherforecast.db
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

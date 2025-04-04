@@ -20,7 +20,7 @@
     <string name="f">°F</string>
     <string name="k">°K</string>
     <string name="Home">home</string>
-    <string name="alarm">Alarms</string>
+    <string name="alert">Alert</string>
     <string name="favorites">favorites</string>
     <string name="settings">settings</string>
     <string name="m_s">m/s</string>
@@ -44,4 +44,5 @@
     <string name="weather_notification">Weather Notification</string>
     <string name="see_full_forecast">%1$s . See Full forecast</string>
     <string name="selected_time_is_in_the_past">Selected time is in the past!</string>
+    <string name="no_favorites_set_tap_to_add_a_favorite">No favorites set. Tap + to add a Favorite.</string>
 </resources>

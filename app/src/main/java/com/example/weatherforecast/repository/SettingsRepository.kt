@@ -2,8 +2,8 @@ package com.example.weatherforecast.repository
 
 
 import android.content.Context
-import com.example.weatherforecast.DataStoreManager
-import com.example.weatherforecast.LanguageHelper
+import com.example.weatherforecast.db.DataStoreManager
+import com.example.weatherforecast.utils.LanguageHelper
 
 
 class SettingsRepository(

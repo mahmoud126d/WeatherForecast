@@ -21,10 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.weatherforecast.R
 import com.example.weatherforecast.db.DataStoreManager
 import com.example.weatherforecast.utils.LanguageHelper
 import com.example.weatherforecast.utils.LocationManager
@@ -44,7 +46,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 fun MapScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    buttonText: String = "Select Location",
+    buttonText: String = stringResource(R.string.select_location),
     onButtonClick: (Double, Double) -> Unit = { lat, lng ->
         // Default implementation if no custom handler is provided
         navController.navigateUp()
@@ -69,9 +71,14 @@ fun MapScreen(
         navController = navController,
         buttonText = buttonText,
         onButtonClick = {
-            onButtonClick(latLng.latitude, latLng.longitude)
-            mapViewModel.saveLatitude(latLng.latitude)
+
+            if(buttonText==context.getString(R.string.select_location)){
+                mapViewModel.saveLatitude(latLng.latitude)
             mapViewModel.saveLongitude(latLng.longitude)
+            }
+            onButtonClick(latLng.latitude, latLng.longitude)
+//            mapViewModel.saveLatitude(latLng.latitude)
+//            mapViewModel.saveLongitude(latLng.longitude)
         },
         mapViewModel = mapViewModel,
         onLocationSelected = { newLatLng ->
@@ -103,8 +110,8 @@ fun Map(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 64.dp)
-                .offset(y= (-60).dp)
-            .alpha(0.8f),
+                .offset(y = (-60).dp)
+                .alpha(0.8f),
             buttonText = buttonText,
             onButtonClick = onButtonClick
         )

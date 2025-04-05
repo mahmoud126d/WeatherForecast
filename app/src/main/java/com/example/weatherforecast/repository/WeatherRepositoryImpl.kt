@@ -77,6 +77,10 @@ class WeatherRepositoryImpl private constructor(
         return weatherLocalDataSource.getWorkId(date,time)
     }
 
+    override suspend fun getWeatherLatLon(longitude: Double, latitude: Double): Flow<WeatherData?> {
+        return weatherLocalDataSource.getWeatherLatLon(longitude,latitude)
+    }
+
     companion object {
         private var INSTANCE: WeatherRepositoryImpl? = null
         fun getInstance(

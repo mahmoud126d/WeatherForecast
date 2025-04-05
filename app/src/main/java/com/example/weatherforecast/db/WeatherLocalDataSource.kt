@@ -17,4 +17,5 @@ interface WeatherLocalDataSource {
     suspend fun insertHomeWeather(weather: HomeWeather):Long
     suspend fun getHomeWeather():Flow<HomeWeather?>
     suspend fun getWorkId(date: String, time: String): String?
+    suspend fun getWeatherLatLon(longitude: Double, latitude: Double): Flow<WeatherData?>
 }

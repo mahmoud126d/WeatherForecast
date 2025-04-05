@@ -57,7 +57,7 @@ fun FavoriteMapScreen(
         navController = navController,
         buttonText = "Set Home Location",
         onButtonClick = { latitude, longitude ->
-            favoritesViewModel.getWeather(longitude,latitude)
+            favoritesViewModel.getWeather(longitude, latitude)
             navController.navigate(Constants.FAVORITES_SCREEN)
         }
     )

@@ -132,7 +132,7 @@ class FavoritesViewModel(
                     getCurrentWeather(longitude, latitude)
 
                 } else {
-                    getStoredWeather()
+                    getStoredWeather(longitude,latitude)
                 }
             }
         }
@@ -230,14 +230,14 @@ class FavoritesViewModel(
         }
     }
 
-    private fun getStoredWeather() {
+    private fun getStoredWeather(longitude: Double, latitude: Double) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                weatherRepository.getHomeWeather().collect {
+                weatherRepository.getWeatherLatLon(longitude,latitude).collect {
                     if (it != null) {
-                        _currentWeather.value = Response.Success(it.toCurrentWeather())
-                        _hourlyWeather.value = Response.Success(it.toCurrentWeather())
-                        _dailyWeather.value = Response.Success(it.toCurrentWeather())
+                        _currentWeather.value = Response.Success(it)
+                        _hourlyWeather.value = Response.Success(it)
+                        _dailyWeather.value = Response.Success(it)
                     }
                 }
             } catch (e: Exception) {

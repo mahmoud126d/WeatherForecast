@@ -50,4 +50,8 @@ class WeatherLocalDataSourceImp(private val dao:WeatherDao):WeatherLocalDataSour
     override suspend fun getWorkId(date: String, time: String): String? {
         return dao.getWorkId(date,time)
     }
+
+    override suspend fun getWeatherLatLon(longitude: Double, latitude: Double): Flow<WeatherData?> {
+        return dao.getWeatherLatLon(longitude,latitude)
+    }
 }
